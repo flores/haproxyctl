@@ -1,0 +1,20 @@
+#!/usr/bin/ruby 
+
+haproxy_init		= "/etc/init.d/haproxy"
+haproxy_stats_socket	= "/tmp/proxystats"
+
+require 'socket'
+
+ctl=UNIXSocket.new("/tmp/proxystats")
+
+if #{ARGV} =~ /^(start|stop|status)$/ 
+	system("#{haproxy_init} #{ARGV}")
+else
+	ctl.puts "#{ARGV}"
+
+	while (line = ctl.gets) do
+  		puts line
+	end
+
+	ctl.close
+end
