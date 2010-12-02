@@ -1,11 +1,20 @@
-Simple wrapper to make life with HAProxy a little more convenient.  
+Simple wrapper to make life with HAProxy a little more convenient.  It talks to
+or creates the stats socket and pid file, and doubles as an init script for
+those folks who installed haproxy from source.
 
-Here's a blog post about it: http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty
+Here's a blog post about the inspiration for it:
+http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty
 
-Examples:
+Examples of usage:
 
-Usage: /etc/init.d/haproxy {start|stop|reload|restart|status}
-Unknown command. Please enter one of the following commands only :
+# ./haproxyctl 
+usage: ./haproxyctl <argument> 
+where argument can be:
+  start		 : start haproxy unless it is already running
+  stop		 : stop an existing haproxy
+  restart	 : restart the process
+  status	 : is haproxy running?  on what ports per lsof?
+  configcheck    : check /etc/haproxy/haproxy.cfg
   clear counters : clear max statistics counters (add 'all' for all counters)
   help           : this message
   prompt         : toggle interactive mode with prompt
@@ -20,28 +29,33 @@ Unknown command. Please enter one of the following commands only :
   disable server : set a server in maintenance mode
   enable server  : re-enable a server that was previously in maintenance mode
 
-l:~# ruby haproxyctl restart
-Restarting haproxy: haproxy.
-l:~# ruby haproxyctl "show stat"
-Usage: /etc/init.d/haproxy {start|stop|reload|restart|status}
-# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
-http,FRONTEND,,,0,0,2000,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,1,0,,,,0,0,0,0,,,,0,0,0,0,0,0,,0,0,0,,,
-ei,guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,1,0,0,0,5,0,,1,2,1,,0,,2,0,,0,L4OK,,0,0,0,0,0,0,0,0,,,,0,0,
-ei,belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,0,1,0,0,5,0,,1,2,2,,0,,2,0,,0,L4OK,,42,0,0,0,0,0,0,0,,,,0,0,
-ei,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,1,1,1,,0,5,0,,1,2,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
-apache,guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,3,1,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-apache,belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,0,1,0,0,5,0,,1,3,2,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-apache,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,1,1,1,,0,5,0,,1,3,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
-sinatra,sinatra_downoi,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,4,1,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-sinatra,sinatra_rindica,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,4,2,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-sinatra,sinatra_guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,4,3,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-sinatra,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,3,3,0,,0,5,0,,1,4,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
-static,ngnix_downoi,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,1,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,ngnix_petite,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,2,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,ngnix_rindica,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,3,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,nginx_stellatus,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,4,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,nginx_belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,5,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,nginx_petite,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,6,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,apache_guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,5,0,,1,5,7,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
-static,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,7,7,0,,0,5,0,,1,5,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
+# ./haproxyctl status
+haproxy is running.  these ports are used and guys are connected.
+*:www (LISTEN)
+*:49122 
 
+# ./haproxyctl "show stat"
+# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
+http,FRONTEND,,,3,3,2000,4,1641,4353,0,0,0,,,,,OPEN,,,,,,,,,1,1,0,,,,0,0,0,2,,,,0,2,2,0,0,0,,0,2,4,,,
+ei,guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,1,0,0,0,28,0,,1,2,1,,0,,2,0,,0,L4OK,,0,0,0,0,0,0,0,0,,,,0,0,
+ei,belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,0,1,0,0,28,0,,1,2,2,,0,,2,0,,0,L4OK,,42,0,0,0,0,0,0,0,,,,0,0,
+ei,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,1,1,1,,0,28,0,,1,2,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
+apache,guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,1,0,0,0,28,0,,1,3,1,,0,,2,0,,0,L4OK,,0,0,0,0,0,0,0,0,,,,0,0,
+apache,belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,0,1,0,0,28,0,,1,3,2,,0,,2,0,,0,L4OK,,42,0,0,0,0,0,0,0,,,,0,0,
+apache,BACKEND,0,0,0,0,0,0,0,0,0,0,,0,0,0,0,UP,1,1,1,,0,28,0,,1,3,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,,0,0,
+sinatra,sinatra_downoi,0,0,0,1,,1,484,3641,,0,,0,0,0,0,UP,1,1,0,0,0,28,0,,1,4,1,,1,,2,0,,1,L4OK,,46,0,1,0,0,0,0,0,,,,0,0,
+sinatra,sinatra_rindica,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP,1,1,0,0,0,28,0,,1,4,2,,0,,2,0,,0,L4OK,,45,0,0,0,0,0,0,0,,,,0,0,
+sinatra,sinatra_guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,DOWN,1,1,0,0,1,2,2,,1,4,3,,0,,2,0,,0,L4CON,,0,0,0,0,0,0,0,0,,,,0,0,
+sinatra,BACKEND,0,0,0,1,0,1,484,3641,0,0,,0,0,0,0,UP,2,2,0,,0,28,0,,1,4,0,,1,,1,0,,1,,,,0,1,0,0,0,0,,,,,0,0,
+static,ngnix_downoi,0,0,0,1,,1,153,264,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,1,,1,,2,0,,1,INI,,,0,1,0,0,0,0,0,,,,0,0,
+static,ngnix_petite,0,0,0,1,,1,522,230,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,2,,1,,2,0,,1,INI,,,0,0,1,0,0,0,0,,,,0,0,
+static,ngnix_rindica,0,0,0,1,,3,0,0,,0,,0,0,2,1,UP 1/2,1,1,0,0,0,28,0,,1,5,3,,1,,2,0,,1,INI,,,0,0,0,0,0,0,0,,,,0,0,
+static,nginx_stellatus,0,0,0,1,,1,482,218,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,4,,1,,2,0,,1,INI,,,0,0,1,0,0,0,0,,,,0,0,
+static,nginx_belem,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,5,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
+static,nginx_petite,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,6,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
+static,apache_guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,7,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
+static,BACKEND,0,0,0,1,0,3,1157,712,0,0,,0,0,2,1,UP,7,7,0,,0,28,0,,1,5,0,,4,,1,0,,2,,,,0,1,2,0,0,0,,,,,0,0,
+
+
+The real magic in the script (talking to the stats socket) is under the else 
+case in the ARGV argument, or here: https://gist.github.com/632613

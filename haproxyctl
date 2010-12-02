@@ -1,20 +1,78 @@
 #!/usr/bin/ruby 
 
-haproxy_init		= "/etc/init.d/haproxy"
-haproxy_stats_socket	= "/tmp/proxystats"
-
 require 'socket'
 
-ctl=UNIXSocket.new("/tmp/proxystats")
+# change this if the file is elsewhere
+config	= "/etc/haproxy/haproxy.cfg" || raise("Expecting haproxy configuration file in #{config}")
 
-if #{ARGV} =~ /^(start|stop|status)$/ 
-	system("#{haproxy_init} #{ARGV}")
-else
-	ctl.puts "#{ARGV}"
+# grab the statistics socket from above
+socket	= `awk '/stats socket/ {print $3}' #{config}`.chomp || raise("Expecting \'stats socket <UNIX_socket_path>\' in #{config}")
 
-	while (line = ctl.gets) do
-  		puts line
-	end
-
-	ctl.close
+# where haproxy lives and pid (either in conf or static location)
+exec    = `which haproxy`.chomp || raise("Where the F is haproxy?")
+pid	= `awk '/pidfile/ {print $2}' #{config}` 
+unless ( pid =~ /\w+/ )
+	pid = "/var/run/haproxy.pid"
 end
+pidof	= `pidof haproxy`.chomp
+
+# the help / no argument output includes the help output from haproxy's stats socket
+unless ARGV.length == 1
+	puts "usage: #{$0} <argument> 
+where argument can be:
+  start		 : start haproxy unless it is already running
+  stop		 : stop an existing haproxy
+  restart	 : restart the process
+  status	 : is haproxy running?  on what ports per lsof?
+  configcheck    : check #{config}"
+end
+
+argument = case ARGV[0]
+	when "start"
+		if ( pidof =~ /\d+/ )
+			raise("haproxy is already running!")
+		else
+			system("#{exec} -f #{config} -D -p #{pid}")
+		end
+	when "stop"
+		if ( pidof =~ /\d+/ )
+			system("kill #{pidof}") || system("killall haproxy")
+		else
+			raise("cannot find haproxy pid")
+		end
+	when "restart"
+		if ( pidof =~ /\d+/ )
+			puts "stopping..."
+			system("kill #{pidof}") || system("killall haproxy")
+			puts "waiting a ms..."
+			puts "checking if haproxy is still running..."
+			stillpidof = `pidof haproxy`.chomp
+			if ( stillpidof =~ /\d+/ )
+				raise("I could not stop HAProxy.  Still running on #{stillpidof}")
+			else
+				puts "starting haproxy..."
+				system("#{exec} -f #{config} -D -p #{pid}")
+			end
+		end
+	when "status"
+		if ( pidof =~ /\d+/ )
+			puts "haproxy is running.  these ports are used and guys are connected."
+			system("lsof -ln -i |awk \'$2 ~ /#{pidof}/ {print $8\" \"$9}\'")
+		else
+			puts "haproxy is not running"
+		end
+	when "configcheck"
+		puts `#{exec} -c -f #{config}`
+	else
+	
+		ctl=UNIXSocket.new(socket)
+		ctl.puts "#{ARGV}"
+
+		while (line = ctl.gets) do
+			unless ( line =~ /Unknown command/ )
+                		puts line
+			end
+		end
+		ctl.close
+end
+
