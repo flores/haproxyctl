@@ -24,7 +24,8 @@ where argument can be:
   stop		 : stop an existing haproxy
   restart	 : restart the process
   status	 : is haproxy running?  on what ports per lsof?
-  configcheck    : check #{config}"
+  configcheck    : check #{config}
+  cloudkick      : cloudkick.com-friendly status and metric for connected users"
 end
 
 argument = case ARGV[0]
@@ -63,11 +64,22 @@ argument = case ARGV[0]
 		end
 	when "configcheck"
 		puts `#{exec} -c -f #{config}`
+	when "cloudkick"
+		if ( pidof =~ /\d+/ )
+			puts "status ok haproxy is running"
+			conn = `lsof -ln -i |grep -c #{pidof}`.chomp.to_i
+			# removes the listener
+			conn = conn - 1
+			puts "metric connections int #{conn}"
+		else
+			puts "status err haproxy is not running!"
+		end
+		
 	else
 	
 		ctl=UNIXSocket.new(socket)
 		ctl.puts "#{ARGV}"
-
+		
 		while (line = ctl.gets) do
 			unless ( line =~ /Unknown command/ )
                 		puts line
