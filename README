@@ -15,6 +15,7 @@ where argument can be:
   restart	 : restart the process
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check /etc/haproxy/haproxy.cfg
+  cloudkick      : cloudkick.com-friendly status and metric for connected users
   clear counters : clear max statistics counters (add 'all' for all counters)
   help           : this message
   prompt         : toggle interactive mode with prompt
