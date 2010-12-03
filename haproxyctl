@@ -33,11 +33,20 @@ argument = case ARGV[0]
 		if ( pidof =~ /\d+/ )
 			raise("haproxy is already running!")
 		else
+			puts "starting haproxy..."
 			system("#{exec} -f #{config} -D -p #{pid}")
+			newpid=`cat #{pid}`
+			if ( newpid =~ /\d+/ )
+				puts "done.  Running on pid #{newpid}."
+			else
+				raise("failed to start!")
+			end
 		end
 	when "stop"
 		if ( pidof =~ /\d+/ )
+			puts "stopping haproxy on pid #{pidof}"
 			system("kill #{pidof}") || system("killall haproxy")
+			puts "done"
 		else
 			raise("cannot find haproxy pid")
 		end
