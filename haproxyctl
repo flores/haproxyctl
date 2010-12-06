@@ -17,12 +17,13 @@ end
 pidof	= `pidof haproxy`.chomp
 
 # the help / no argument output includes the help output from haproxy's stats socket
-unless ARGV.length == 1
+if ( ARGV.length != 1 || ARGV[0] =~ /help/ )
 	puts "usage: #{$0} <argument> 
 where argument can be:
   start		 : start haproxy unless it is already running
   stop		 : stop an existing haproxy
   restart	 : restart the process
+  reload	 : gracefully shutdown and reload #{config}
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check #{config}
   cloudkick      : cloudkick.com-friendly status and metric for connected users"
@@ -31,7 +32,7 @@ end
 argument = case ARGV[0]
 	when "start"
 		if ( pidof =~ /\d+/ )
-			raise("haproxy is already running!")
+			raise("haproxy is already running on pid #{pidof}!")
 		else
 			puts "starting haproxy..."
 			system("#{exec} -f #{config} -D -p #{pid}")
@@ -64,9 +65,25 @@ argument = case ARGV[0]
 				system("#{exec} -f #{config} -D -p #{pid}")
 			end
 		end
+	when "reload"
+		if ( pidof =~ /\d+/ )
+			puts "gracefully stopping connections on pid #{pidof}..."
+			system("#{exec} -f #{config} -D -p #{pid} -sf #{pidof}")
+			puts "checking if connections still alive..."
+			newpidof = `pidof haproxy`.chomp
+			while ( pidof == newpidof )
+				puts "still haven't killed old pid.  waiting 3s for existing connections to die..."
+				sleep 3
+				stillpidof = `pidof haproxy`.chomp
+			end
+			puts "haproxy reloaded and running on pid #{newpidof}"
+		else
+			puts "haproxy not running.  starting..."
+			system("#{exec} -f #{config} -D -p #{pid}")
+		end
 	when "status"
 		if ( pidof =~ /\d+/ )
-			puts "haproxy is running.  these ports are used and guys are connected."
+			puts "haproxy is running on pid #{pidof}.\nthese ports are used and guys are connected:"
 			system("lsof -ln -i |awk \'$2 ~ /#{pidof}/ {print $8\" \"$9}\'")
 		else
 			puts "haproxy is not running"
@@ -85,7 +102,6 @@ argument = case ARGV[0]
 		end
 		
 	else
-	
 		ctl=UNIXSocket.new(socket)
 		ctl.puts "#{ARGV}"
 		
@@ -94,6 +110,7 @@ argument = case ARGV[0]
                 		puts line
 			end
 		end
+		
 		ctl.close
 end
 

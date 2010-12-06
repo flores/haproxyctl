@@ -13,6 +13,7 @@ where argument can be:
   start		 : start haproxy unless it is already running
   stop		 : stop an existing haproxy
   restart	 : restart the process
+  reload	 : gracefully shutdown and reload /etc/haproxy/haproxy.cfg
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check /etc/haproxy/haproxy.cfg
   cloudkick      : cloudkick.com-friendly status and metric for connected users
@@ -31,9 +32,12 @@ where argument can be:
   enable server  : re-enable a server that was previously in maintenance mode
 
 # ./haproxyctl status
-haproxy is running.  these ports are used and guys are connected.
+haproxy is running on pid 19026.
+these ports are used and guys are connected:
+172.16.10.8:www->172.16.1.2:56976 (ESTABLISHED)
+172.16.10.8.:www->172.16.1.2:18963 (ESTABLISHED)
+*:57141 
 *:www (LISTEN)
-*:49122 
 
 # ./haproxyctl "show stat"
 # pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
