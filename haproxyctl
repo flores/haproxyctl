@@ -30,6 +30,7 @@ where argument can be:
 end
 
 argument = case ARGV[0]
+
 	when "start"
 		if ( pidof =~ /\d+/ )
 			raise("haproxy is already running on pid #{pidof}!")
@@ -43,6 +44,7 @@ argument = case ARGV[0]
 				raise("failed to start!")
 			end
 		end
+
 	when "stop"
 		if ( pidof =~ /\d+/ )
 			puts "stopping haproxy on pid #{pidof}"
@@ -51,9 +53,10 @@ argument = case ARGV[0]
 		else
 			raise("cannot find haproxy pid")
 		end
+
 	when "restart"
 		if ( pidof =~ /\d+/ )
-			puts "stopping..."
+			puts "stopping existing haproxy on pid #{pidof}..."
 			system("kill #{pidof}") || system("killall haproxy")
 			puts "waiting a ms..."
 			puts "checking if haproxy is still running..."
@@ -63,8 +66,24 @@ argument = case ARGV[0]
 			else
 				puts "starting haproxy..."
 				system("#{exec} -f #{config} -D -p #{pid}")
+				newpidof = `pidof haproxy`.chomp
+				if ( newpidof =~ /\d+/ )
+					puts "haproxy is running on pid #{newpidof}"
+				else
+					puts "error.  haproxy did not start!"
+				end
+			end
+		else
+			puts "haproxy was not running.  starting..."
+			system("#{exec} -f #{config} -D -p #{pid}")
+			newpidof = `pidof haproxy`.chomp
+			if ( newpidof =~ /\d+/ )
+				puts "haproxy is running on pid #{newpidof}"
+			else
+				puts "error.  haproxy did not start!"
 			end
 		end
+
 	when "reload"
 		if ( pidof =~ /\d+/ )
 			puts "gracefully stopping connections on pid #{pidof}..."
@@ -81,6 +100,7 @@ argument = case ARGV[0]
 			puts "haproxy not running.  starting..."
 			system("#{exec} -f #{config} -D -p #{pid}")
 		end
+
 	when "status"
 		if ( pidof =~ /\d+/ )
 			puts "haproxy is running on pid #{pidof}.\nthese ports are used and guys are connected:"
@@ -88,8 +108,10 @@ argument = case ARGV[0]
 		else
 			puts "haproxy is not running"
 		end
+
 	when "configcheck"
 		puts `#{exec} -c -f #{config}`
+
 	when "cloudkick"
 		if ( pidof =~ /\d+/ )
 			puts "status ok haproxy is running"
