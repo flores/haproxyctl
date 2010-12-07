@@ -61,6 +61,28 @@ static,nginx_petite,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,6,,0,,
 static,apache_guinea,0,0,0,0,,0,0,0,,0,,0,0,0,0,UP 1/2,1,1,0,0,0,28,0,,1,5,7,,0,,2,0,,0,INI,,,0,0,0,0,0,0,0,,,,0,0,
 static,BACKEND,0,0,0,1,0,3,1157,712,0,0,,0,0,2,1,UP,7,7,0,,0,28,0,,1,5,0,,4,,1,0,,2,,,,0,1,2,0,0,0,,,,,0,0,
 
+# ./haproxyctl reload     
+gracefully stopping connections on pid 19026...
+checking if connections still alive...
+haproxy reloaded and running on pid 20317
 
-The real magic in the script (talking to the stats socket) is under the else 
+# ./haproxyctl "show errors"
+
+# acts as a health check and lets you graph connections on cloudkick.com
+# ./haproxyctl cloudkick    
+status ok haproxy is running
+metric connections int 1
+
+# does normal things like checks if a process is running before starting it...
+# ./haproxyctl start    
+./haproxyctl:35: haproxy is already running on pid 20317! (RuntimeError)
+
+# ./haproxyctl restart
+stopping existing haproxy on pid 20317...
+waiting a ms...
+checking if haproxy is still running...
+starting haproxy...
+done.  running on pid 20348
+
+But the real magic in the script (talking to the stats socket) is under the else 
 case in the ARGV argument, or here: https://gist.github.com/632613
