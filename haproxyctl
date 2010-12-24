@@ -1,9 +1,9 @@
-#!/usr/bin/ruby 
+#!/usr/bin/env ruby 
 
 # variables you may actually need to change
 
 # change this if the file is elsewhere
-@config	= "/etc/haproxy/haproxy.cfg" || raise("Expecting haproxy configuration file in #{@config}")
+@config	= "/etc/haproxy/haproxy.cfg" 
 
 # grab the statistics socket from above
 socket	= `awk '/stats socket/ {print $3}' #{@config}`.chomp || raise("Expecting \'stats socket <UNIX_socket_path>\' in #{@config}")
@@ -48,17 +48,37 @@ def check_running()
 		return nil
 	end
 end
+
+def reload(pid)
+	if ( pid )
+		puts "gracefully stopping connections on pid #{pid}..."
+		system("#{@exec} -f #{@config} -sf #{pid}")
+		puts "checking if connections still alive on #{pid}..."
+		nowpid = check_running() 
+		while ( pid == nowpid )
+			puts "still haven't killed old pid.  waiting 2s for existing connections to die... (ctrl+c to stop this check)"
+			sleep 2
+			nowpid = check_running() || 0
+		end
+		puts "reloaded haproxy on pid #{nowpid}"
+	else
+		puts "haproxy is not running!"
+	end
+end			
 	
+
+
 # the help / no argument output includes the help output from haproxy's stats socket
 if ( ARGV.length != 1 || ARGV[0] =~ /help/ )
 	puts "usage: #{$0} <argument> 
 where argument can be:
   start		 : start haproxy unless it is already running
-  stop		 : stop an existing haproxy
-  restart	 : restart the process
-  reload	 : gracefully shutdown and reload #{@config}
+  stop		 : stop an existing haproxy 
+  restart	 : immediately shutdown and restart
+  reload	 : gracefully terminate existing connections, reload #{@config}
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check #{@config}
+  nagios	 : nagios-friendly status for running process and listener
   cloudkick      : cloudkick.com-friendly status and metric for connected users"
 end
 
@@ -80,8 +100,10 @@ argument = case ARGV[0]
 		if ( pidof )
 			stop(pidof)
 			stillpidof = check_running()
-			if ( stillpidof == pidof )
-				raise("I could not stop HAProxy.  Still running on #{stillpidof}")
+			while ( stillpidof == pidof )
+				puts "still haven't killed old pid.  waiting 3s for existing connections to die... (ctrl+c to stop)"
+                                sleep 3
+                                stillpidof = check_running() || 0
 			end
 			start()
 		else
@@ -91,16 +113,7 @@ argument = case ARGV[0]
 
 	when "reload"
 		if ( pidof )
-			puts "gracefully stopping connections on pid #{pidof}..."
-			system("#{@exec} -f #{@config} -D -p #{@pid} -sf #{pidof}")
-			puts "checking if connections still alive..."
-			newpidof = check_running() 
-			while ( pidof == newpidof )
-				puts "still haven't killed old pid.  waiting 3s for existing connections to die... (ctrl+c to stop)"
-				sleep 3
-				stillpidof = `pidof haproxy`.chomp
-			end
-			start()
+			reload(pidof)
 		else
 			puts "haproxy not running.  starting..."
 			start()
@@ -116,6 +129,15 @@ argument = case ARGV[0]
 
 	when "configcheck"
 		puts `#{@exec} -c -f #{@config}`
+
+	when "nagios"
+		if ( pidof )
+			puts "OK"
+			exit
+		else
+			puts "CRITICAL: HAProxy is not running!"
+			exit(2)
+		end
 
 	when "cloudkick"
 		if ( pidof )
