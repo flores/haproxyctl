@@ -6,7 +6,8 @@
 @config	= "/etc/haproxy/haproxy.cfg" 
 
 # grab the statistics socket from above
-socket	= `awk '/stats socket/ {print $3}' #{@config}`.chomp || raise("Expecting \'stats socket <UNIX_socket_path>\' in #{@config}")
+@socket	= `awk '/stats socket/ {print $3}' #{@config}`.chomp ||
+  raise("Expecting \'stats socket <UNIX_socket_path>\' in #{@config}")
 
 # where haproxy lives and pid (either in conf or static location)
 @exec    = `which haproxy`.chomp || raise("Where the F is haproxy?")
@@ -56,7 +57,9 @@ def reload(pid)
 		puts "checking if connections still alive on #{pid}..."
 		nowpid = check_running() 
 		while ( pid == nowpid )
-			puts "still haven't killed old pid.  waiting 2s for existing connections to die... (ctrl+c to stop this check)"
+			puts "still haven't killed old pid.  
+                          waiting 2s for existing connections to die... 
+                          (ctrl+c to stop this check)"
 			sleep 2
 			nowpid = check_running() || 0
 		end
@@ -66,6 +69,21 @@ def reload(pid)
 	end
 end			
 	
+def unixsock(command)
+        require 'socket'
+
+	output=[]
+        ctl=UNIXSocket.new(@socket)
+
+        ctl.puts "#{command}"
+        while (line = ctl.gets) do
+                unless ( line =~ /Unknown command/ )
+                        output << line
+                end
+        end
+
+	return output
+end
 
 
 # the help / no argument output includes the help output from haproxy's stats socket
@@ -151,26 +169,14 @@ argument = case ARGV[0]
 			puts "status err haproxy is not running!"
 		end
 
-	else
-		require 'socket'
-
-		ctl=UNIXSocket.new(socket)
-
-		if ARGV[0] =~ /show health/
-			ctl.puts "show stat"
-			while (line = ctl.gets) do
-				data = line.split(',')
-				printf "%-15s %-20s %-7s %-3s\n", data[0], data[1], data[17], data[18]
-			end
-		else
-			ctl.puts "#{ARGV}"
-			while (line = ctl.gets) do
-				unless ( line =~ /Unknown command/ )
-                			puts line
-				end
-			end
+	when "show health"
+		status=unixsock("show stat")
+		status.each do |line|
+			data = line.split(',')
+			printf "%-15s %-20s %-7s %-3s\n", data[0], data[1], data[17], data[18]
 		end
+	else
+		puts unixsock( "#{ARGV}" )
 
-		ctl.close
 end
 
