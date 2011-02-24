@@ -70,17 +70,18 @@ def reload(pid)
 end			
 	
 def unixsock(command)
-        require 'socket'
+	require 'socket'
 
 	output=[]
-        ctl=UNIXSocket.new(@socket)
-
-        ctl.puts "#{command}"
-        while (line = ctl.gets) do
-                unless ( line =~ /Unknown command/ )
-                        output << line
-                end
-        end
+	
+	ctl=UNIXSocket.new(@socket)
+	ctl.puts "#{command}"
+	while (line = ctl.gets) do
+		unless ( line =~ /Unknown command/ )
+			output << line
+		end
+	end
+	ctl.close
 
 	return output
 end
