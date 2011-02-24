@@ -79,7 +79,8 @@ where argument can be:
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check #{@config}
   nagios	 : nagios-friendly status for running process and listener
-  cloudkick      : cloudkick.com-friendly status and metric for connected users"
+  cloudkick      : cloudkick.com-friendly status and metric for connected users
+  show health    : show status of all frontends and backend servers"
 end
 
 pidof = check_running()
@@ -149,19 +150,27 @@ argument = case ARGV[0]
 		else
 			puts "status err haproxy is not running!"
 		end
-		
+
 	else
 		require 'socket'
 
 		ctl=UNIXSocket.new(socket)
-		ctl.puts "#{ARGV}"
-		
-		while (line = ctl.gets) do
-			unless ( line =~ /Unknown command/ )
-                		puts line
+
+		if ARGV[0] =~ /show health/
+			ctl.puts "show stat"
+			while (line = ctl.gets) do
+				data = line.split(',')
+				printf "%-15s %-20s %-7s %-3s\n", data[0], data[1], data[17], data[18]
+			end
+		else
+			ctl.puts "#{ARGV}"
+			while (line = ctl.gets) do
+				unless ( line =~ /Unknown command/ )
+                			puts line
+				end
 			end
 		end
-		
+
 		ctl.close
 end
 
