@@ -1,4 +1,15 @@
 #!/usr/bin/env ruby 
+#
+# HAProxy control script to start, stop, restart, configcheck, etc, as 
+# well as communicate to the stats socket.
+#
+# See https://github.com/flores/haproxyctl/README
+#
+# This line here is just for Redhat users who like "service haproxyctl blah"
+# chkconfig: 2345 80 30
+# description: HAProxy is a fast and reliable load balancer for UNIX systems
+#	HAProxyctl is an easy way to do init shit and talk to its stats socket
+#
 
 # variables you may actually need to change
 
