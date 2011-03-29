@@ -187,6 +187,24 @@ argument = case ARGV[0]
 			data = line.split(',')
 			printf "%-15s %-20s %-7s %-3s\n", data[0], data[1], data[17], data[18]
 		end
+	when /disable all (.+)/
+		servername=$1
+		status=unixsock("show stat")
+		status.each do |line|
+			data = line.split(',')
+			if ( ( data[1] = servername ) && ( data[17] = 'UP' ) )
+				unixsock("disable server #{data[0]}/#{servername}")
+			end
+		end
+	when /enable all (.+)/
+		servername=$1
+		status=unixsock("show stat")
+		status.each do |line|
+			data = line.split(',')
+			if ( ( data[1] = servername ) && ( data[17] =~ /Down|MAINT/i ) )
+				unixsock("enable server #{data[0]}/#{servername}")
+			end
+		end
 	else
 		puts unixsock( "#{ARGV}" )
 
