@@ -13,12 +13,19 @@ where argument can be:
   stop		 : stop an existing haproxy 
   restart	 : immediately shutdown and restart
   reload	 : gracefully terminate existing connections, reload /etc/haproxy/haproxy.cfg
- ./haproxyctl reload     
   status	 : is haproxy running?  on what ports per lsof?
   configcheck    : check /etc/haproxy/haproxy.cfg
   nagios	 : nagios-friendly status for running process and listener
   cloudkick      : cloudkick.com-friendly status and metric for connected users
   show health    : show status of all frontends and backend servers
+  enable all server
+		 : re-enable a server previously in maint mode on multiple backends
+  disable all server
+		 : disable a server from every backend it exists
+  enable all EXCEPT server
+		 : like 'enable all', but re-enables every backend except for <server>
+  disable all EXCEPT server
+		 : like 'disable all', but disables every backend except for <server>
   clear counters : clear max statistics counters (add 'all' for all counters)
   help           : this message
   prompt         : toggle interactive mode with prompt
@@ -135,5 +142,83 @@ static,BACKEND,0,0,0,60,0,92841,37107745,12609282341,0,0,,1,29,59,13,UP,6,6,0,,0
 ssh,localhost,0,0,0,3,,122,54524,291662,,0,,0,0,0,0,UP,1,1,0,0,0,2144680,0,,1,7,1,,122,,2,0,,10,L4OK,,0,0,121,0,1,0,0,0,,,,0,0,
 ssh,BACKEND,0,0,0,3,0,122,54524,291662,0,0,,0,0,0,0,UP,1,1,0,,0,2144680,0,,1,7,0,,122,,1,0,,10,,,,0,121,0,1,0,0,,,,,0,0,
 
-But the real magic in the script (talking to the stats socket) is under the else 
-case in the ARGV argument, or here: https://gist.github.com/632613
+# Enables or disables a target server from every backend it appears.  Also has EXCEPT flag.
+# ./haproxyctl "show health"
+# pxname        svname               status  weight
+http            FRONTEND             OPEN       
+sinatra         sinatra_downoi       DOWN    1  
+sinatra         sinatra_rindica      DOWN    1  
+sinatra         sinatra_guinea       UP      1  
+sinatra         BACKEND              UP      1  
+ei              guinea               UP      1  
+ei              BACKEND              UP      1  
+drop            guinea               UP      1  
+drop            BACKEND              UP      1  
+apache          guinea               UP      1  
+apache          BACKEND              UP      1  
+static          ngnix_downoi         UP      1  
+static          ngnix_petite         UP      1  
+static          ngnix_rindica        UP      1  
+static          nginx_stellatus      UP      1  
+static          nginx_belem          UP      1  
+static          nginx_petite         MAINT   1  
+static          apache_guinea        UP      1  
+static          BACKEND              UP      6  
+ssh             localhost            UP      1  
+ssh             BACKEND              UP      1  
+
+                                               
+# ./haproxyctl "disable all EXCEPT apache_guinea"
+# ./haproxyctl "show health"
+# pxname        svname               status  weight
+http            FRONTEND             OPEN       
+sinatra         sinatra_downoi       DOWN    1  
+sinatra         sinatra_rindica      DOWN    1  
+sinatra         sinatra_guinea       UP      1  
+sinatra         BACKEND              UP      1  
+ei              guinea               UP      1  
+ei              BACKEND              UP      1  
+drop            guinea               UP      1  
+drop            BACKEND              UP      1  
+apache          guinea               UP      1  
+apache          BACKEND              UP      1  
+static          ngnix_downoi         MAINT   1  
+static          ngnix_petite         MAINT   1  
+static          ngnix_rindica        MAINT   1  
+static          nginx_stellatus      MAINT   1  
+static          nginx_belem          MAINT   1  
+static          nginx_petite         MAINT   1  
+static          apache_guinea        UP      1  
+static          BACKEND              UP      1  
+ssh             localhost            UP      1  
+ssh             BACKEND              UP      1  
+
+                                               
+# ./haproxyctl "enable all EXCEPT apache_guinea"
+# ./haproxyctl "show health"
+# pxname        svname               status  weight
+http            FRONTEND             OPEN       
+sinatra         sinatra_downoi       DOWN    1  
+sinatra         sinatra_rindica      DOWN    1  
+sinatra         sinatra_guinea       UP      1  
+sinatra         BACKEND              UP      1  
+ei              guinea               UP      1  
+ei              BACKEND              UP      1  
+drop            guinea               UP      1  
+drop            BACKEND              UP      1  
+apache          guinea               UP      1  
+apache          BACKEND              UP      1  
+static          ngnix_downoi         UP 1/2  1  
+static          ngnix_petite         UP 1/2  1  
+static          ngnix_rindica        UP 1/2  1  
+static          nginx_stellatus      UP 1/2  1  
+static          nginx_belem          UP 1/2  1  
+static          nginx_petite         UP 1/2  1  
+static          apache_guinea        UP      1  
+static          BACKEND              UP      7  
+ssh             localhost            UP      1  
+ssh             BACKEND              UP      1 
+
+
+# But the real magic in the script (talking to the stats socket) is under the else 
+# case in the ARGV argument, or here: https://gist.github.com/632613
