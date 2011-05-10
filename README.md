@@ -50,7 +50,7 @@ Options
 Examples
 --------
 
-* Status check
+## Status check
 	./haproxyctl status
 	haproxy is running on pid 23162.
 	these ports are used and guys are connected:
@@ -60,7 +60,7 @@ Examples
 	*:53093 
 	173.255.194.115:www->83.39.69.106:19338 (ESTABLISHED)
 
-* Errors to the backend servers
+## Errors to the backend servers
 	./haproxyctl "show errors"
 	[04/Feb/2011:21:05:59.542] frontend http (#1): invalid request
 	  src 209.59.188.205, session #39574, backend <NONE> (#-1), server <NONE> (#-1)
@@ -72,7 +72,7 @@ Examples
 	  00110  Accept: */*\r\n
 	  00123  \r\n
 
-* Human readable health check
+## Human readable health check
 	./haproxyctl "show health"
 	  pxname        svname               status  weight
 	http            FRONTEND             OPEN       
@@ -100,24 +100,24 @@ Examples
 	ssh             localhost            UP      1  
 	ssh             BACKEND              UP      1  
 
-* Disable servers on the fly	
+## Disable servers on the fly	
 	./haproxyctl "disable server static/nginx_belem"
 	
 	./haproxyctl "show health" |grep nginx_belem
 	static          nginx_belem          MAINT   1 
 	
-* Graceful reloads
+## Graceful reloads
 	./haproxyctl reload
 	gracefully stopping connections on pid 23162...
 	checking if connections still alive on 23162...
 	reloaded haproxy on pid 1119
 	
-* Cloudkick/Nagios checks with graph-friendly output
+## Cloudkick/Nagios checks with graph-friendly output
 	./haproxyctl cloudkick    
 	status ok haproxy is running
 	metric connections int 1
 	
-* does normal things like checks if a process is running before starting it...
+## does normal things like checks if a process is running before starting it...
 	./haproxyctl start    
 	./haproxyctl:35: haproxy is already running on pid 20317! (RuntimeError)
 	
@@ -128,7 +128,7 @@ Examples
 	starting haproxy...
 	done.  running on pid 20348
 	
-* keeps all the regular UNIX socket stuff
+## keeps all the regular UNIX socket stuff
 	./haproxyctl "show stat"
 	pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
 	http,FRONTEND,,,3,82,2000,39585,47067637,12818945246,0,0,1465,,,,,OPEN,,,,,,,,,1,1,0,,,,0,0,0,59,,,,0,91460,13125,4115,305,73,,0,131,109078,,,
@@ -156,7 +156,7 @@ Examples
 	ssh,localhost,0,0,0,3,,122,54524,291662,,0,,0,0,0,0,UP,1,1,0,0,0,2144680,0,,1,7,1,,122,,2,0,,10,L4OK,,0,0,121,0,1,0,0,0,,,,0,0,
 	ssh,BACKEND,0,0,0,3,0,122,54524,291662,0,0,,0,0,0,0,UP,1,1,0,,0,2144680,0,,1,7,0,,122,,1,0,,10,,,,0,121,0,1,0,0,,,,,0,0,
 	
-* Enables or disables a target server from every backend it appears.  
+## Enables or disables a target server from every backend it appears.  
 	./haproxyctl "show health"
 	# pxname        svname               status  weight
 	http            FRONTEND             OPEN       
@@ -207,7 +207,7 @@ Examples
 	ssh             localhost            UP      1  
 	ssh             BACKEND              UP      1  
 	
-* Has an EXCEPT flag, too	                                               
+## Has an EXCEPT flag, too	                                               
 	./haproxyctl "enable all EXCEPT apache_guinea"
 	./haproxyctl "show health"
 	  pxname        svname               status  weight
