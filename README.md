@@ -51,6 +51,7 @@ Examples
 --------
 
 ## Status check
+<pre>
 	./haproxyctl status
 	haproxy is running on pid 23162.
 	these ports are used and guys are connected:
@@ -59,6 +60,7 @@ Examples
 	*:www (LISTEN)
 	*:53093 
 	173.255.194.115:www->83.39.69.106:19338 (ESTABLISHED)
+</pre>
 
 ## Errors to the backend servers
 	./haproxyctl "show errors"
