@@ -11,6 +11,16 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 
 [Here](http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty)'s a blog post about the inspiration for it:
 
+Installation
+------------
+
+On most UNIX, assuming HAProxy is in the $PATH:
+	git clone git@github.com:flores/haproxyctl.git
+	ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
+
+For chkconfig/RedHat/Centos, add:
+	chkconfig --add haproxyctl
+
 Options
 -----------------
 
