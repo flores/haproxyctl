@@ -126,11 +126,39 @@ Examples
 	checking if connections still alive on 23162...
 	reloaded haproxy on pid 1119
 	
-## Cloudkick/Nagios checks with graph-friendly output
+## Cloudkick/Nagios checks with graph-friendly output for queue size, total connections, etc
 	./haproxyctl cloudkick    
 	status ok haproxy is running
-	metric connections int 1
-	
+	metric connections int 12
+	metric http_FRONTEND_request_rate int 45
+	metric http_FRONTEND_health_check_duration int 45
+	metric sinatra_sinatra_guinea_health_check_duration int 4
+	metric sinatra_BACKEND_health_check_duration int 4
+	metric mobile_sinatra_mobile_health_check_duration int 2
+	metric mobile_BACKEND_health_check_duration int 2
+	metric ei_guinea_health_check_duration int 4
+	metric ei_BACKEND_health_check_duration int 4
+	metric drop_guinea_total_requests gauge 1
+	metric drop_guinea_health_check_duration int 6
+	metric drop_BACKEND_total_requests gauge 1
+	metric drop_BACKEND_health_check_duration int 6
+	metric apache_guinea_health_check_duration int 41
+	metric apache_BACKEND_health_check_duration int 41
+	metric static_ngnix_downoi_total_requests gauge 472
+	metric static_ngnix_downoi_health_check_duration int 7
+	metric static_ngnix_petite_total_requests gauge 475
+	metric static_ngnix_petite_health_check_duration int 8
+	metric static_ngnix_rindica_total_requests gauge 457
+	metric static_ngnix_rindica_health_check_duration int 8
+	metric static_nginx_stellatus_total_requests gauge 470
+	metric static_nginx_stellatus_health_check_duration int 7
+	metric static_nginx_belem_total_requests gauge 460
+	metric static_nginx_belem_health_check_duration int 8
+	metric static_apache_guinea_total_requests gauge 449
+	metric static_apache_guinea_health_check_duration int 14
+	metric static_BACKEND_total_requests gauge 2783
+	metric static_BACKEND_health_check_duration int 45
+
 ## does normal things like checks if a process is running before starting it...
 	./haproxyctl start    
 	./haproxyctl:35: haproxy is already running on pid 20317! (RuntimeError)

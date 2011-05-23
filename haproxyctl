@@ -185,6 +185,17 @@ argument = case ARGV[0]
 			# removes the listener
 			conn = conn - 1
 			puts "metric connections int #{conn}"
+			status=unixsock("show stat")
+			status.each do |line|
+				line = line.split(',')
+				if (line[0] !~ /^#/)
+                        		host = "#{line[0]}_#{line[1]}"
+		                        puts "metric #{host}_request_rate int #{line[47]}" if line[47].to_i > 0
+                		        puts "metric #{host}_total_requests gauge #{line[49]}" if line[49].to_i > 0
+		                        puts "metric #{host}_health_check_duration int #{line[35]}" if line[35].to_i > 0
+                		        puts "metric ${host}_current_queue int #{line[3]}" if line[3].to_i > 0
+                		end
+			end
 		else
 			puts "status err haproxy is not running!"
 		end
