@@ -85,7 +85,7 @@ def unixsock(command)
 
 	output=[]
 	
-	ctl=UNIXSocket.new(@socket)
+	ctl=UNIXSocket.open(@socket)
 	ctl.puts "#{command}"
 	while (line = ctl.gets) do
 		unless ( line =~ /Unknown command/ )
