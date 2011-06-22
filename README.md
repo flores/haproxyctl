@@ -9,7 +9,7 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 * Provides Nagios and Cloudkick health checks
 * chkconfig/service-able for Redhat folk
 
-[Here](http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty)'s a blog post about the inspiration for it:
+[Here](http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty)'s a blog post about the inspiration for it.
 
 Installation
 ------------
@@ -22,6 +22,8 @@ On most UNIX, assuming HAProxy is in the $PATH:
 For chkconfig/RedHat/Centos, add:
 	
 	chkconfig --add haproxyctl
+
+There is also an HAProxy source installation script.  This installs not only the steps above but latest HAProxy sources!
 
 Options
 -----------------
@@ -274,4 +276,8 @@ Examples
 	static          BACKEND              UP      7  
 	ssh             localhost            UP      1  
 	ssh             BACKEND              UP      1 
-	
+
+License
+-----------------
+
+This code is released under the MIT License.  You should feel free to do whatever you want with it.	
