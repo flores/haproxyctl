@@ -7,7 +7,7 @@ module HAProxyCTL
     end
 
     def config
-      @config ||= File.read(@config_path)
+      @config ||= File.read(config_path)
     end
 
     def has_exec?

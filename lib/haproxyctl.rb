@@ -5,7 +5,7 @@ module HAProxyCTL
 
   def start
     puts "starting haproxy..."
-    system("#{@exec} -f #{@config} -D -p #{@pid}")
+    system("#{exec} -f #{config} -D -p #{pid}")
     newpidof = `pidof haproxy`.chomp
     if ( newpidof =~ /\d+/ )
       puts "haproxy is running on pid #{newpidof}"
@@ -29,7 +29,7 @@ module HAProxyCTL
   def reload(pid)
     if ( pid )
       puts "gracefully stopping connections on pid #{pid}..."
-      system("#{@exec} -f #{@config} -sf #{pid}")
+      system("#{exec} -f #{config} -sf #{pid}")
       puts "checking if connections still alive on #{pid}..."
       nowpid = check_running()
       while ( pid == nowpid )
@@ -50,7 +50,7 @@ module HAProxyCTL
 
     output=[]
 
-    ctl=UNIXSocket.open(@socket)
+    ctl=UNIXSocket.open(socket)
     ctl.puts "#{command}"
     while (line = ctl.gets) do
       unless ( line =~ /Unknown command/ )
@@ -74,9 +74,9 @@ usage: #{$0} <argument>
     start                     : start haproxy unless it is already running
     stop                      : stop an existing haproxy
     restart                   : immediately shutdown and restart
-    reload                    : gracefully terminate existing connections, reload #{@config_path}
+    reload                    : gracefully terminate existing connections, reload #{config_path}
     status                    : is haproxy running?  on what ports per lsof?
-    configcheck               : check #{@config_path}
+    configcheck               : check #{config_path}
     nagios                    : nagios-friendly status for running process and listener
     cloudkick                 : cloudkick.com-friendly status and metric for connected users
     show health               : show status of all frontends and backend servers

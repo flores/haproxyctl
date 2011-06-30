@@ -70,7 +70,7 @@ when "status"
   end
 
 when "configcheck"
-  puts `#{@exec} -c -f #{@config_path}`
+  puts `#{exec} -c -f #{config_path}`
 
 when "nagios"
   if ( pidof )
