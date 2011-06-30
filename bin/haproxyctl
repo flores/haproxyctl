@@ -25,8 +25,7 @@ unless has_exec?
   raise "Cannot find haproxy executable. Please ensure it is in your $PATH, or set $HAPROXY_BIN environment variable."
 end
 
-display_usage! if argument =~ /help/
-display_usage! if ARGV.length < 1
+display_usage! if argument =~ /help/ || ARGV.length < 1
 
 case argument
 when "start"
