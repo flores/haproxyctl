@@ -2,18 +2,17 @@ module Rhapr
   module Environment
     attr_accessor :haproxy_pid, :config_path, :config, :exec
 
-    # @return [String] The path to the HAProxy configuration file. Set the ENV variable $HAPROXY_CONFIG to override defaults
+    # @return [String, nil] The path to the HAProxy configuration file, or nil if not found. Set the ENV variable $HAPROXY_CONFIG to override defaults.
     def config_path
       return(@config_path) if @config_path
 
       if ENV['HAPROXY_CONFIG']
         @config_path = ENV['HAPROXY_CONFIG']
       else
-        %w{/etc/haproxy/haproxy.cfg /etc/haproxy.cfg /usr/local/etc/haproxy.cfg}.each {|cfg|
-          next unless File.exists?(cfg)
+        config_paths = %w{/etc/haproxy/haproxy.cfg /etc/haproxy.cfg /usr/local/etc/haproxy.cfg}
+        config_paths.select!{|cfg| File.exists?(cfg)}
 
-          @config_path = cfg
-        }
+        @config_path = config_paths.first
       end
 
       return(@config_path)
