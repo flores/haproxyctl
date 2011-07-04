@@ -19,6 +19,7 @@ module Rhapr
     end
 
     # @return [String] The raw contents of the HAProxy configuration file.
+    # @raise [RuntimeError] If it cannot read the contents of #config_path.
     def config
       @config ||= begin
                     File.read(config_path)
