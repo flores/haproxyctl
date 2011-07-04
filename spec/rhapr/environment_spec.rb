@@ -110,7 +110,7 @@ describe Rhapr::Environment do
 
   describe '#pid' do
     it 'should parse out the pidfile from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:basic_haproxy) }
+      @env_test.should_receive(:config).and_return { config_for(:pid_test_haproxy) }
 
       @env_test.pid.should == '/some/other/run/haproxy.pid'
     end
