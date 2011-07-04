@@ -1,4 +1,4 @@
 module Rhapr
-  module SocketRunner
+  module Interface
   end
 end
