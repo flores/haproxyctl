@@ -1,6 +1,6 @@
 module Rhapr
   module Environment
-    attr_accessor :haproxy_pid, :config_path, :config, :exec
+    attr_reader :haproxy_pid, :config_path, :config, :exec, :socket_path
 
     # @return [String, nil] The path to the HAProxy configuration file, or nil if not found. Set the ENV variable $HAPROXY_CONFIG to override defaults.
     def config_path
@@ -53,14 +53,24 @@ module Rhapr
       return(@exec)
     end
 
+    # @return [UNIXSocket] A connection to the HAProxy Socket
+    # @raise [RuntimeError] Raised if a socket connection could not be established
+    def socket
+      begin
+        UNIXSocket.open(socket_path)
+      rescue Errno::EACCES => e
+        raise RuntimeError.new("Could not open a socket with HAProxy. Error message: #{e.message}")
+      end
+    end
+
     # @return [String] The path to the HAProxy stats socket.
     # @raise [RuntimeError] Raised if no stats socket has been specified, in the HAProxy configuration.
     # @todo: Should there be an ENV var for this? Perhaps allow config-less runs of rhapr?
-    def socket
-      @socket ||= begin
-                    config.match /stats\s+socket\s+([^\s]*)/
-                    $1 || raise(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
-                  end
+    def socket_path
+      @socket_path  ||= begin
+                          config.match /stats\s+socket\s+([^\s]*)/
+                          $1 || raise(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+                        end
     end
 
     # @return [String] Returns the path to the pidfile, specified in the HAProxy configuration. Returns an assumption, if not found.

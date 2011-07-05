@@ -93,17 +93,21 @@ describe Rhapr::Environment do
   end
 
   describe '#socket' do
+    it 'should establish a socket connection with HAProxy'
+  end
+
+  describe '#socket_path' do
     it 'should parse out the io socket from the config file' do
       @env_test.should_receive(:config).and_return { config_for(:basic_haproxy) }
 
-      @env_test.socket.should == '/tmp/haproxy'
+      @env_test.socket_path.should == '/tmp/haproxy'
     end
 
     it 'should raise an error if it cannot derive an io socket from the config file' do
       @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
 
       lambda {
-        @env_test.socket
+        @env_test.socket_path
       }.should raise_error(RuntimeError)
     end
   end
