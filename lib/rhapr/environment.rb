@@ -1,3 +1,5 @@
+require 'socket'
+
 module Rhapr
   module Environment
     attr_reader :haproxy_pid, :config_path, :config, :exec, :socket_path
