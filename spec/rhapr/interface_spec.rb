@@ -71,8 +71,8 @@ describe Rhapr::Interface do
       subject.should_receive(:send).with('get weight test/test9').and_return('No such server.')
 
       lambda {
-        subject.get_weight('test', 'test1')
-      }.should raise_error(ArgumentError.new("Backend/Server (test/test9) is not known to HAProxy"))
+        subject.get_weight('test', 'test9')
+      }.should raise_error(ArgumentError, "HAProxy did not recognize the specified Backend/Server. Response from HAProxy: No such server.")
     end
   end
 

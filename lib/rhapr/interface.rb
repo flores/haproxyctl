@@ -62,18 +62,29 @@ module Rhapr
     end
     alias :session :show_sess
 
-    # @return [String] The raw response from HAProxy.
+    # @return [Array<Fixnum, Fixnum>] An Array with Two Elements: the Current Weight and the Initial Weight.
     # @todo: Allow the numeric id to be used as a parameter?
     def get_weight(backend, server)
       resp = send "get weight #{backend}/#{server}"
+
+      resp.match /([[:digit:]]+) \(initial ([[:digit:]]+)\)/
+      weight, initial = $1, $2
+
+      return [weight.to_i, initial.to_i] if weight and initial
+
+      raise ArgumentError.new("HAProxy did not recognize the specified Backend/Server. Response from HAProxy: #{resp}")
     end
 
+    # @todo: Implement.
+    # @todo: Allow the numeric id to be used as a parameter?
     def set_weight(backend, server, weight)
     end
 
+    # @todo: Implement.
     def disable(backend, server)
     end
 
+    # @todo: Implement.
     def enable(backend, server)
     end
 
