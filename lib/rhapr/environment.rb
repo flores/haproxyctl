@@ -81,7 +81,7 @@ module Rhapr
     def pid
       @pid  ||= begin
                   config.match /pidfile ([^\s]*)/
-                  @pid = $1 || '/var/run/haproxy.pid'
+                  $1 || '/var/run/haproxy.pid'
                 end
     end
 
