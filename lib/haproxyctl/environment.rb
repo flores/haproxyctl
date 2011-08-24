@@ -18,7 +18,7 @@ module HAProxyCTL
       return(@exec) if @exec
 
       @exec   = ENV['HAPROXY_BIN']
-      @exec ||= `which haproxy`
+      @exec ||= `which haproxy`.chomp
 
       if @exec.empty?
         begin
