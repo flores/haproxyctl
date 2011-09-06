@@ -5,7 +5,7 @@ module HAProxyCTL
 
   def start
     puts "starting haproxy..."
-    system("#{exec} -f #{config} -D -p #{pid}")
+    system("#{exec} -f #{config_path} -D -p #{pid}")
     newpidof = `pidof haproxy`.chomp
     if ( newpidof =~ /\d+/ )
       puts "haproxy is running on pid #{newpidof}"
@@ -29,7 +29,7 @@ module HAProxyCTL
   def reload(pid)
     if ( pid )
       puts "gracefully stopping connections on pid #{pid}..."
-      system("#{exec} -f #{config} -sf #{pid}")
+      system("#{exec} -f #{config_path} -sf #{pid}")
       puts "checking if connections still alive on #{pid}..."
       nowpid = check_running()
       while ( pid == nowpid )
