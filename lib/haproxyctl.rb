@@ -60,7 +60,7 @@ module HAProxyCTL
       end
     rescue Errno::EPIPE
       ctl.close
-      sleep 1
+      sleep 0.5
       runs += 1
       if ( runs < 4 )
         retry
