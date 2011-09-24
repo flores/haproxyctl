@@ -50,8 +50,15 @@ module HAProxyCTL
 
     output=[]
 
-    ctl=UNIXSocket.open(socket)
-    ctl.puts "#{command}"
+    begin 
+      ctl=UNIXSocket.open(socket)
+      ctl.puts "#{command}"
+    rescue Errno::EPIPE
+      puts "the haproxy socket closed while making this request. trying again."
+      ctl.close
+      sleep 2
+      retry
+    end
     while (line = ctl.gets) do
       unless ( line =~ /Unknown command/ )
         output << line
