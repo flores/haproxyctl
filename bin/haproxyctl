@@ -11,7 +11,8 @@
 # HAProxyctl is an easy way to do init shit and talk to its stats socket
 #
 
-lib = File.join(File.dirname(__FILE__), 'lib')
+require 'pathname'
+lib = File.join(File.dirname(Pathname.new(__FILE__).realpath), '../lib')
 $:.unshift lib unless $:.include?(lib)
 
 require 'haproxyctl'
