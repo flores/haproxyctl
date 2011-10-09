@@ -22,8 +22,8 @@ fi
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
 wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.17.tar.gz
-tar xvfz haproxy-1.4.17.tar.gz
-cd haproxy-1.4.17
+tar xvfz haproxy-1.4.18.tar.gz
+cd haproxy-1.4.18
 
 # tricky.  awk will exit 1 if this isn't an x86_64 system...
 if uname -a | grep x86_64 ; then
