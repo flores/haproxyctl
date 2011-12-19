@@ -34,13 +34,13 @@ module HAProxyCTL
 
     def socket
       @socket ||= begin
-        config.match /stats socket ([^\s]*)/
+        config.match /stats socket \s*([^\s]*)/
         $1 || raise("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
 
     def pidfile
-      config.match /pidfile ([^\s]*)/
+      config.match /pidfile \s*([^\s]*)/
       @pidfile = $1 || raise("Expecting 'pidfile <pid_file_path>' in #{config_path}")
     end
 
