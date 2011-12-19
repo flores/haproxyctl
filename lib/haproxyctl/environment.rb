@@ -34,22 +34,25 @@ module HAProxyCTL
 
     def socket
       @socket ||= begin
-        config.match /stats socket ([^\s]*)/
+        config.match /stats socket \s*([^\s]*)/
         $1 || raise("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
 
-    def pid
-      config.match /pidfile ([^\s]*)/
-      @pid = $1 || '/var/run/haproxy.pid'
+    def pidfile
+      config.match /pidfile \s*([^\s]*)/
+      @pidfile = $1 || raise("Expecting 'pidfile <pid_file_path>' in #{config_path}")
     end
 
     # @return [String, nil] Returns the PID of HAProxy as a string, if running. Nil otherwise.
     def check_running
-      pidof = `pidof haproxy`
-      pidof.strip!
+      pid = File.read(pidfile)
+      pid.strip!
 
-      return pidof if pidof =~ /^\d+$/
+      # verify this pid exists and is haproxy
+      if pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/
+        return pid
+      end
     end
     alias :pidof :check_running
   end
