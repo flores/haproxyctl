@@ -5,10 +5,10 @@ module HAProxyCTL
 
   def start
     puts "starting haproxy..."
-    system("#{exec} -f #{config_path} -D -p #{pid}")
-    newpidof = `pidof haproxy`.chomp
-    if ( newpidof =~ /\d+/ )
-      puts "haproxy is running on pid #{newpidof}"
+    system("#{exec} -f #{config_path} -D -p #{pidfile}")
+    newpid = check_running()
+    if ( newpid =~ /^\d+$/ )
+      puts "haproxy is running on pid #{newpid}"
       return true
     else
       puts "error.  haproxy did not start!"
@@ -19,7 +19,7 @@ module HAProxyCTL
   def stop(pid)
     if pid
       puts "stopping haproxy on pid #{pid}..."
-      system("kill #{pid}") || system("killall haproxy")
+      system("kill #{pid}") || system("kill -9 #{pid}")
       puts "... stopped"
     else
       puts "haproxy is not running!"
