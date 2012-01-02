@@ -106,7 +106,7 @@ when "show health"
   status=unixsock("show stat")
   status.each do |line|
     data = line.split(',')
-    printf "%-15s %-20s %-7s %-3s\n", data[0], data[1], data[17], data[18]
+    printf "%-25s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
   end
 when /disable all EXCEPT (.+)/
   servername=$1
