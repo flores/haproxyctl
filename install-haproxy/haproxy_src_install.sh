@@ -22,10 +22,17 @@ fi
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
 wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.19.tar.gz
+
+# check the checksum
+MD5CHECK=`md5sum /usr/local/src/haproxy-1.4.19.tar.gz |awk '{print $1}'`
+if [ "$MD5CHECK" != "41392d738460dbf99295fd928031c6a4" ] ; then
+        echo -e "MD5s do not match!\nBailing.";
+        exit 2;
+fi
+
 tar xvfz haproxy-1.4.19.tar.gz
 cd haproxy-1.4.19
 
-# tricky.  awk will exit 1 if this isn't an x86_64 system...
 if uname -a | grep x86_64 ; then
 	make TARGET=linux26 CPU=x86_64 USE_PCRE=1
 else 
