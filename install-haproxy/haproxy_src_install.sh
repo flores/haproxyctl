@@ -21,9 +21,9 @@ fi
 # grab last stable.  HAProxy's site versions nicely - these will still be here after the next update
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
-wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.18.tar.gz
-tar xvfz haproxy-1.4.18.tar.gz
-cd haproxy-1.4.18
+wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.19.tar.gz
+tar xvfz haproxy-1.4.19.tar.gz
+cd haproxy-1.4.19
 
 # tricky.  awk will exit 1 if this isn't an x86_64 system...
 if uname -a | grep x86_64 ; then
@@ -45,5 +45,5 @@ if [ $OS = 'redhat' ]; then
 	chkconfig --add haproxyctl;
 	yum remove -y gcc make
 elif [ $OS = 'debian' ]; then
-	apt-get purge build-essential
+	apt-get purge -y build-essential
 fi
