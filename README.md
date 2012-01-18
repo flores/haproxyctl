@@ -39,6 +39,7 @@ Options
 	  nagios	 : nagios-friendly status for running process and listener
 	  cloudkick      : cloudkick.com-friendly status and metric for connected users
 	  show health    : show status of all frontends and backend servers
+    	  show backends  : show status of backend pools of servers
 	  enable all server
 			 : re-enable a server previously in maint mode on multiple backends
 	  disable all server
@@ -90,31 +91,46 @@ Examples
 
 ## Human readable health check
 	./haproxyctl "show health"
-	  pxname        svname               status  weight
-	http            FRONTEND             OPEN       
-	sinatra         sinatra_downoi       DOWN    1  
-	sinatra         sinatra_rindica      DOWN    1  
-	sinatra         sinatra_guinea       UP      1  
-	sinatra         BACKEND              UP      1  
-	ei              guinea               UP      1  
-	ei              belem                UP      1  
-	ei              BACKEND              UP      1  
-	drop            guinea               UP      1  
-	drop            belem                UP      1  
-	drop            BACKEND              UP      1  
-	apache          guinea               UP      1  
-	apache          belem                UP      1  
-	apache          BACKEND              UP      1  
-	static          ngnix_downoi         UP      1  
-	static          ngnix_petite         UP      1  
-	static          ngnix_rindica        UP      1  
-	static          nginx_stellatus      UP      1  
-	static          nginx_belem          UP      1  
-	static          nginx_petite         DOWN    1  
-	static          apache_guinea        UP      1  
-	static          BACKEND              UP      6  
-	ssh             localhost            UP      1  
-	ssh             BACKEND              UP      1  
+	  pxname		  svname			 status  weight
+	http			  FRONTEND             		 OPEN       
+	sinatra			  sinatra_downoi       		 DOWN    1  
+	sinatra			  sinatra_rindica      		 DOWN    1  
+	sinatra			  sinatra_guinea       		 UP      1  
+	sinatra			  BACKEND              		 UP      1  
+	ei			  guinea               		 UP      1  
+	ei			  belem                		 UP      1  
+	ei			  BACKEND              		 UP      1  
+	drop			  guinea               		 UP      1  
+	drop			  belem                		 UP      1  
+	drop			  BACKEND              		 UP      1  
+	apache			  guinea               		 UP      1  
+	apache			  belem                		 UP      1  
+	apache			  BACKEND              		 UP      1  
+	static			  ngnix_downoi         		 UP      1  
+	static			  ngnix_petite         		 UP      1  
+	static			  ngnix_rindica        		 UP      1  
+	static			  nginx_stellatus      		 UP      1  
+	static			  nginx_belem          		 UP      1  
+	static			  nginx_petite         		 DOWN    1  
+	static			  apache_guinea        		 UP      1  
+	static			  BACKEND              		 UP      6  
+	ssh			  localhost            		 UP      1  
+	ssh			  BACKEND              		 UP      1  
+
+	./haproxyctl "show backends"
+	contact                   BACKEND                        UP        1
+	alpha                     BACKEND                        DOWN      0
+	sinatra                   BACKEND                        DOWN      0
+	python                    BACKEND                        UP        1
+	mobile                    BACKEND                        DOWN      0
+	ei                        BACKEND                        UP        1
+	showoff                   BACKEND                        UP        1
+	drop                      BACKEND                        UP        1
+	cheap                     BACKEND                        UP        1
+	apache                    BACKEND                        UP        1
+	static                    BACKEND                        UP        1
+	ssh                       BACKEND                        UP        1
+
 
 ## Disable servers on the fly	
 	./haproxyctl "disable server static/nginx_belem"

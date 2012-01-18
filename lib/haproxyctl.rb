@@ -97,6 +97,7 @@ usage: #{$0} <argument>
     nagios                    : nagios-friendly status for running process and listener
     cloudkick                 : cloudkick.com-friendly status and metric for connected users
     show health               : show status of all frontends and backend servers
+    show backends             : show status of backend pools of servers
     enable all server         : re-enable a server previously in maint mode on multiple backends
     disable all server        : disable a server from every backend it exists
     enable all EXCEPT server  : like 'enable all', but re-enables every backend except for <server>

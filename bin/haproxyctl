@@ -108,6 +108,12 @@ when "show health"
     data = line.split(',')
     printf "%-25s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
   end
+when /show backend(s?)/
+  status=unixsock("show stat").grep(/BACKEND/)
+  status.each do |line|
+    data = line.split(',')
+    printf "%-25s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
+  end
 when /disable all EXCEPT (.+)/
   servername=$1
   status=unixsock("show stat")
