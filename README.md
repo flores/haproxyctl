@@ -27,40 +27,38 @@ There is also an HAProxy source installation script.  This installs not only the
 
 Options
 -----------------
-
-	./haproxyctl <argument> 
-	where argument can be:
-	  start		 : start haproxy unless it is already running
-	  stop		 : stop an existing haproxy 
-	  restart	 : immediately shutdown and restart
-	  reload	 : gracefully terminate existing connections, reload /etc/haproxy/haproxy.cfg
-	  status	 : is haproxy running?  on what ports per lsof?
-	  configcheck    : check /etc/haproxy/haproxy.cfg
-	  nagios	 : nagios-friendly status for running process and listener
-	  cloudkick      : cloudkick.com-friendly status and metric for connected users
-	  show health    : show status of all frontends and backend servers
-    	  show backends  : show status of backend pools of servers
-	  enable all server
-			 : re-enable a server previously in maint mode on multiple backends
-	  disable all server
-			 : disable a server from every backend it exists
-	  enable all EXCEPT server
-			 : like 'enable all', but re-enables every backend except for <server>
-	  disable all EXCEPT server
-			 : like 'disable all', but disables every backend except for <server>
-	  clear counters : clear max statistics counters (add 'all' for all counters)
-	  help           : this message
-	  prompt         : toggle interactive mode with prompt
-	  quit           : disconnect
-	  show info      : report information about the running process
-	  show stat      : report counters for each proxy and server
-	  show errors    : report last request and response errors for each proxy
-	  show sess [id] : report the list of current sessions or dump this session
-	  get weight     : report a server's current weight
-	  set weight     : change a server's weight
-	  set timeout    : change a timeout setting
-	  disable server : set a server in maintenance mode
-	  enable server  : re-enable a server that was previously in maintenance mode
+<pre>
+# ./haproxyctl help
+usage: ./haproxyctl <argument>
+  where argument can be:
+    start			: start haproxy unless it is already running
+    stop			: stop an existing haproxy
+    restart			: immediately shutdown and restart
+    reload			: gracefully terminate existing connections, reload /etc/haproxy/haproxy.cfg
+    status			: is haproxy running?  on what ports per lsof?
+    configcheck			: check /etc/haproxy/haproxy.cfg
+    nagios			: nagios-friendly status for running process and listener
+    cloudkick			: cloudkick.com-friendly status and metric for connected users
+    show health			: show status of all frontends and backend servers
+    show backends		: show status of backend pools of servers
+    enable all <server>		: re-enable a server previously in maint mode on multiple backends
+    disable all <server>	: disable a server from every backend it exists
+    enable all EXCEPT <server>	: like 'enable all', but re-enables every backend except for <server>
+    disable all EXCEPT <server> : like 'disable all', but disables every backend except for <server>
+    clear counters		: clear max statistics counters (add 'all' for all counters)
+    help			: this message
+    prompt			: toggle interactive mode with prompt
+    quit			: disconnect
+    show info			: report information about the running process
+    show stat			: report counters for each proxy and server
+    show errors			: report last request and response errors for each proxy
+    show sess [id]		: report the list of current sessions or dump this session
+    get weight			: report a server's current weight
+    set weight			: change a server's weight
+    set timeout			: change a timeout setting
+    disable server		: set a server in maintenance mode
+    enable server		: re-enable a server that was previously in maintenance mode
+</pre>.
 
 Examples
 --------
@@ -78,6 +76,7 @@ Examples
 </pre>
 
 ## Errors to the backend servers
+<pre>
 	./haproxyctl "show errors"
 	[04/Feb/2011:21:05:59.542] frontend http (#1): invalid request
 	  src 209.59.188.205, session #39574, backend <NONE> (#-1), server <NONE> (#-1)
@@ -88,8 +87,9 @@ Examples
 	  00081  Host: wet.biggiantnerds.com\r\n
 	  00110  Accept: */*\r\n
 	  00123  \r\n
-
+</pre>
 ## Human readable health check
+<pre>
 	./haproxyctl "show health"
 	  pxname		  svname			 status  weight
 	http			  FRONTEND             		 OPEN       
@@ -130,21 +130,24 @@ Examples
 	apache                    BACKEND                        UP        1
 	static                    BACKEND                        UP        1
 	ssh                       BACKEND                        UP        1
-
+</pre>
 
 ## Disable servers on the fly	
+<pre>
 	./haproxyctl "disable server static/nginx_belem"
 	
 	./haproxyctl "show health" |grep nginx_belem
 	static          nginx_belem          MAINT   1 
-	
+</pre>	
 ## Graceful reloads
+<pre>
 	./haproxyctl reload
 	gracefully stopping connections on pid 23162...
 	checking if connections still alive on 23162...
 	reloaded haproxy on pid 1119
-	
+</pre>	
 ## Cloudkick/Nagios checks with graph-friendly output for queue size, total connections, etc
+<pre>
 	./haproxyctl cloudkick    
 	status ok haproxy is running
 	metric connections int 12
@@ -176,8 +179,9 @@ Examples
 	metric static_apache_guinea_health_check_duration int 14
 	metric static_BACKEND_total_requests gauge 2783
 	metric static_BACKEND_health_check_duration int 45
-
+</pre>
 ## does normal things like checks if a process is running before starting it...
+<pre>
 	./haproxyctl start    
 	./haproxyctl:35: haproxy is already running on pid 20317! (RuntimeError)
 	
@@ -187,8 +191,9 @@ Examples
 	checking if haproxy is still running...
 	starting haproxy...
 	done.  running on pid 20348
-	
+</pre>	
 ## keeps all the regular UNIX socket stuff
+<pre>
 	./haproxyctl "show stat"
 	pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
 	http,FRONTEND,,,3,82,2000,39585,47067637,12818945246,0,0,1465,,,,,OPEN,,,,,,,,,1,1,0,,,,0,0,0,59,,,,0,91460,13125,4115,305,73,,0,131,109078,,,
@@ -215,8 +220,10 @@ Examples
 	static,BACKEND,0,0,0,60,0,92841,37107745,12609282341,0,0,,1,29,59,13,UP,6,6,0,,0,2144680,0,,1,6,0,,92854,,1,0,,131,,,,0,78901,11763,2165,12,0,,,,,7257,23,
 	ssh,localhost,0,0,0,3,,122,54524,291662,,0,,0,0,0,0,UP,1,1,0,0,0,2144680,0,,1,7,1,,122,,2,0,,10,L4OK,,0,0,121,0,1,0,0,0,,,,0,0,
 	ssh,BACKEND,0,0,0,3,0,122,54524,291662,0,0,,0,0,0,0,UP,1,1,0,,0,2144680,0,,1,7,0,,122,,1,0,,10,,,,0,121,0,1,0,0,,,,,0,0,
+</pre>
 	
-## Enables or disables a target server from every backend it appears.  
+## More additions: Enables or disables a target server from every backend it appears.  
+<pre>
 	./haproxyctl "show health"
 	# pxname        svname               status  weight
 	http            FRONTEND             OPEN       
@@ -266,8 +273,10 @@ Examples
 	static          BACKEND              UP      1  
 	ssh             localhost            UP      1  
 	ssh             BACKEND              UP      1  
+</pre>
 	
 ## Has an EXCEPT flag, too	                                               
+<pre>
 	./haproxyctl "enable all EXCEPT apache_guinea"
 	./haproxyctl "show health"
 	  pxname        svname               status  weight
@@ -292,6 +301,7 @@ Examples
 	static          BACKEND              UP      7  
 	ssh             localhost            UP      1  
 	ssh             BACKEND              UP      1 
+</pre>
 
 License
 -----------------
