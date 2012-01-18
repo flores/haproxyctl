@@ -101,7 +101,7 @@ usage: #{$0} <argument>
     enable all server         : re-enable a server previously in maint mode on multiple backends
     disable all server        : disable a server from every backend it exists
     enable all EXCEPT server  : like 'enable all', but re-enables every backend except for <server>
-    disable all EXCEPT server : like 'disable all', but disables every backend except for <server>"
+    disable all EXCEPT server : like 'disable all', but disables every backend except for <server>
 USAGE
   end
 end
