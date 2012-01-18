@@ -97,9 +97,9 @@ Examples
 	sinatra			  sinatra_rindica      		 DOWN    1  
 	sinatra			  sinatra_guinea       		 UP      1  
 	sinatra			  BACKEND              		 UP      1  
-	ei			  guinea               		 UP      1  
-	ei			  belem                		 UP      1  
-	ei			  BACKEND              		 UP      1  
+	ei  			  guinea               		 UP      1  
+	ei  			  belem                		 UP      1  
+	ei  			  BACKEND              		 UP      1  
 	drop			  guinea               		 UP      1  
 	drop			  belem                		 UP      1  
 	drop			  BACKEND              		 UP      1  
@@ -114,8 +114,8 @@ Examples
 	static			  nginx_petite         		 DOWN    1  
 	static			  apache_guinea        		 UP      1  
 	static			  BACKEND              		 UP      6  
-	ssh			  localhost            		 UP      1  
-	ssh			  BACKEND              		 UP      1  
+	ssh  			  localhost            		 UP      1  
+	ssh  			  BACKEND              		 UP      1  
 
 	./haproxyctl "show backends"
 	contact                   BACKEND                        UP        1
