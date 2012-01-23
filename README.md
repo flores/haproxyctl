@@ -58,7 +58,7 @@ usage: ./haproxyctl <argument>
     set timeout			: change a timeout setting
     disable server		: set a server in maintenance mode
     enable server		: re-enable a server that was previously in maintenance mode
-</pre>.
+</pre>
 
 Examples
 --------
