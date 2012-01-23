@@ -9,7 +9,7 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 * Provides Nagios and Cloudkick health checks
 * chkconfig/service-able for Redhat folk
 
-[Here](http://borderstylo.com/posts/228-haproxy-the-quick-and-the-dirty)'s a blog post about the inspiration for it.
+[Here](http://scale10x.biggiantnerds.com) is a presentation about it.
 
 Installation
 ------------
