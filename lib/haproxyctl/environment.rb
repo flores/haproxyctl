@@ -40,8 +40,16 @@ module HAProxyCTL
     end
 
     def pidfile
-      config.match /pidfile \s*([^\s]*)/
-      @pidfile = $1 || raise("Expecting 'pidfile <pid_file_path>' in #{config_path}")
+      if config.match(/pidfile \s*([^\s]*)/)
+        @pidfile = $1
+      else
+        std_pid = "/var/run/haproxy.pid"
+        if File.exists?(std_pid)
+          @pidfile = std_pid
+        else
+          raise("Expecting 'pidfile <pid_file_path>' in #{config_path} or a pid file in #{std_pid}")
+        end
+      end
     end
 
     # @return [String, nil] Returns the PID of HAProxy as a string, if running. Nil otherwise.
