@@ -1,4 +1,12 @@
 #!/bin/bash -ex
+#
+# This installs latest HAProxy from source along with HAProxyCTL
+#
+# It will clobber files and stuff and is only meant as a very
+# quick and dirty (but sometimes handy) installer.
+#
+
+STARTINGDIR=$PWD
 
 # make sure we have make, pcre and junk
 if [ -e /etc/redhat-release ]; then
@@ -23,6 +31,11 @@ fi
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
 wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.20.tar.gz
+
+# get rid of an existing haproxy
+if [ -e /usr/local/haproxy ]; then
+  rm -fr /usr/local/haproxy
+fi
 
 # check the checksum
 MD5CHECK=`md5sum /usr/local/src/haproxy-1.4.20.tar.gz |awk '{print $1}'`
@@ -50,8 +63,13 @@ ln -s /usr/local/sbin/haproxy /usr/sbin/haproxy
 
 # grab carlo's haproxyctl script/init
 cd /usr/local
-git clone https://github.com/flores/haproxyctl.git
-ln -s /usr/local/haproxyctl/haproxyctl.rb /etc/init.d/haproxyctl
+if [ -e /usr/local/haproxy ]; then
+  cd haproxy;
+  git pull;
+else
+  git clone https://github.com/flores/haproxyctl.git
+  ln -s /usr/local/haproxyctl/haproxyctl /etc/init.d/haproxyctl
+fi
 
 # remove make and gcc
 if [ $OS = 'redhat' ]; then
@@ -60,3 +78,5 @@ if [ $OS = 'redhat' ]; then
 elif [ $OS = 'debian' ]; then
 	apt-get purge -y build-essential
 fi
+
+cd $STARTINGDIR
