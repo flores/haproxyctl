@@ -54,7 +54,7 @@ module HAProxyCTL
     begin 
       ctl=UNIXSocket.open(socket)
       if (ctl)
-        ctl.puts "#{command}"
+        ctl.write "#{command};"
       else
         puts "cannot talk to #{socket}"
       end
