@@ -303,6 +303,11 @@ Examples
   ssh             BACKEND              UP      1 
 </pre>
 
+Contributors
+------------
+
+* Carlo Flores <github@petalphile.com> - Core Application
+
 License
 -----------------
 

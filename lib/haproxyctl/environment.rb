@@ -2,6 +2,10 @@ module HAProxyCTL
   module Environment
     attr_accessor :pidof, :config_path, :config, :exec
 
+    def version
+      puts "HAProxyCTL #{HAProxyCTL::VERSION}"
+    end
+
     def config_path
       @config_path ||= ENV['HAPROXY_CONFIG'] || '/etc/haproxy/haproxy.cfg'
     end
@@ -22,7 +26,7 @@ module HAProxyCTL
 
       if @exec.empty?
         begin
-          `haproxy -v`
+          `haproxy -v 2>/dev/null`
           @exec = 'haproxy'
         rescue Errno::ENOENT => e
           @exec = nil
