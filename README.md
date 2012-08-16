@@ -306,7 +306,15 @@ Examples
 Contributors
 ------------
 
-* Carlo Flores <github@petalphile.com> - Core Application
+Ordered by date of first contribution.
+[Auto-generated](http://github.com/dtrejo/node-authors) on Thu Aug 16 2012 15:45:25 GMT-0700 (PDT).
+
+- [flores aka `flores`](https://github.com/flores)
+- [Scott Gonyea aka `sgonyea`](https://github.com/sgonyea)
+- [Ben Lovett aka `blovett`](https://github.com/blovett)
+- [John A. Barbuto aka `jbarbuto`](https://github.com/jbarbuto)
+- [Till Klampaeckel aka `till`](https://github.com/till)
+- [Erik Osterman aka `osterman`](https://github.com/osterman)
 
 License
 -----------------
