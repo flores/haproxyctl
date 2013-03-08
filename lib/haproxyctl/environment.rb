@@ -58,8 +58,10 @@ module HAProxyCTL
 
     # @return [String, nil] Returns the PID of HAProxy as a string, if running. Nil otherwise.
     def check_running
-      pid = File.read(pidfile)
-      pid.strip!
+      if File.exists?(pidfile)
+        pid = File.read(pidfile)
+        pid.strip!
+      end
 
       # verify this pid exists and is haproxy
       if pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/
