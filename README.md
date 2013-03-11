@@ -315,6 +315,8 @@ Ordered by date of first contribution.
 - [John A. Barbuto aka `jbarbuto`](https://github.com/jbarbuto)
 - [Till Klampaeckel aka `till`](https://github.com/till)
 - [Erik Osterman aka `osterman`](https://github.com/osterman)
+- [Martin Hald aka `mhald`](https://github.com/mhald)
+- [deniedboarding](https://github.com/deniedboarding)
 
 License
 -----------------
