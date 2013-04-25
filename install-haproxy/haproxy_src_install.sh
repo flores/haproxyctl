@@ -6,6 +6,7 @@
 # quick and dirty (but sometimes handy) installer.
 #
 
+HAPROXYVER="1.4.23"
 STARTINGDIR=$PWD
 
 # make sure we have make, pcre and junk
@@ -30,7 +31,7 @@ fi
 # grab last stable.  HAProxy's site versions nicely - these will still be here after the next update
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
-wget http://haproxy.1wt.eu/download/1.4/src/haproxy-1.4.20.tar.gz
+wget http://haproxy.1wt.eu/download/1.4/src/haproxy-$HAPROXYVER.tar.gz
 
 # get rid of an existing haproxy
 if [ -e /usr/local/haproxy ]; then
@@ -38,14 +39,16 @@ if [ -e /usr/local/haproxy ]; then
 fi
 
 # check the checksum
-MD5CHECK=`md5sum /usr/local/src/haproxy-1.4.20.tar.gz |awk '{print $1}'`
-if [ "$MD5CHECK" != "0cd3b91812ff31ae09ec4ace6355e29e" ] ; then
+MD5CHECK=`md5sum /usr/local/src/haproxy-$HAPROXYVER.tar.gz |awk '{print $1}'`
+if [ "$MD5CHECK" != "6535d5e58037ada4b58b439cebe03c79" ] ; then
         echo -e "MD5s do not match!\nBailing.";
         exit 2;
 fi
 
-tar xvfz haproxy-1.4.20.tar.gz
-cd haproxy-1.4.20
+tar xvfz haproxy-$HAPROXYVER.tar.gz
+rm haproxy-$HAPROXYVER.tar.gz
+
+cd haproxy-$HAPROXYVER
 
 if uname -a | grep x86_64 ; then
 	make TARGET=linux26 CPU=x86_64 USE_PCRE=1
@@ -63,8 +66,8 @@ ln -s /usr/local/sbin/haproxy /usr/sbin/haproxy
 
 # grab carlo's haproxyctl script/init
 cd /usr/local
-if [ -e /usr/local/haproxy ]; then
-  cd haproxy;
+if [ -e /usr/local/haproxyctl ]; then
+  cd haproxyctl;
   git pull;
 else
   git clone https://github.com/flores/haproxyctl.git
