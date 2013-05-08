@@ -50,7 +50,7 @@ usage: ./haproxyctl <argument>
     prompt: toggle interactive mode with prompt
     quit: disconnect
     show info: report information about the running process
-    show stat: report counters for each proxy and server
+    show stat [counter...]: report counters for each proxy and server
     show errors: report last request and response errors for each proxy
     show sess [id]: report the list of current sessions or dump this session
     get weight: report a server's current weight
@@ -221,8 +221,36 @@ Examples
   ssh,localhost,0,0,0,3,,122,54524,291662,,0,,0,0,0,0,UP,1,1,0,0,0,2144680,0,,1,7,1,,122,,2,0,,10,L4OK,,0,0,121,0,1,0,0,0,,,,0,0,
   ssh,BACKEND,0,0,0,3,0,122,54524,291662,0,0,,0,0,0,0,UP,1,1,0,,0,2144680,0,,1,7,0,,122,,1,0,,10,,,,0,121,0,1,0,0,,,,,0,0,
 </pre>
-  
-## More additions: Enables or disables a target server from every backend it appears.  
+### Extends stat command to print only counters supplied as arguments
+<pre>
+  ./haproxyctl "show stat qcur qmax"
+  http,FRONTEND,,
+  sinatra,sinatra_downoi,0,0
+  sinatra,sinatra_rindica,0,0
+  sinatra,sinatra_guinea,0,0
+  sinatra,BACKEND,0,0
+  ei,guinea,0,0
+  ei,belem,0,0
+  ei,BACKEND,0,0
+  drop,guinea,0,0
+  drop,belem,0,0
+  drop,BACKEND,0,0
+  apache,guinea,0,0
+  apache,belem,0,0
+  apache,BACKEND,0,0
+  static,ngnix_downoi,0,0
+  static,ngnix_petite,0,0
+  static,ngnix_rindica,0,0
+  static,nginx_stellatus,0,0
+  static,nginx_belem,0,0
+  static,nginx_petite,0,0
+  static,apache_guinea,0,0
+  static,BACKEND,0,0
+  ssh,localhost,0,0
+  ssh,BACKEND,0,0
+</pre>
+
+## More additions: Enables or disables a target server from every backend it appears.
 <pre>
   ./haproxyctl "show health"
   # pxname        svname               status  weight
