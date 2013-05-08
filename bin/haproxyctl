@@ -144,6 +144,21 @@ begin
         end
       end
     end
+  when /show stat (.+)/
+    fieldnames=$1
+    status=unixsock("show stat")
+    indices = fieldnames.split(" ").map do |name|
+      status.first.split(',').index(name) || begin
+        $stderr.puts("no such field: #{name}")
+        $stderr.puts("  #{status.first}")
+        exit 1
+      end
+    end
+    status[1..-1].each do |line|
+      row = line.split(',')
+      filtered = indices.map {|index| row[index] }
+      puts (row[0...2] + filtered).compact.join(',')
+    end
   when /enable all (.+)/
     servername=$1
     status=unixsock("show stat")
