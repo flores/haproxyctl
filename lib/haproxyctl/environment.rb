@@ -38,7 +38,7 @@ module HAProxyCTL
 
     def socket
       @socket ||= begin
-        config.match /stats\s*socket \s*([^\s]*)/
+        config.match /stats\s+socket \s*([^\s]*)/
         $1 || raise("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
