@@ -342,8 +342,8 @@ Contributors
 - [Erik Osterman aka `osterman`](https://github.com/osterman)
 - [Martin Hald aka `mhald`](https://github.com/mhald)
 - [deniedboarding](https://github.com/deniedboarding)
-- [Aaron Blew](https://github.com/blewa)
-- [Nick Griffiths](https://github.com/nicobrevin)
+- [Aaron Blew aka `blewa`](https://github.com/blewa)
+- [Nick Griffiths aka `nicobrevin`](https://github.com/nicobrevin)
 
 License
 -----------------
