@@ -250,7 +250,7 @@ Examples
   ssh,BACKEND,0,0
 </pre>
 
-## More additions: Enables or disables a target server from every backend it appears.
+## Enable or disable a target server from every backend it appears.
 <pre>
   ./haproxyctl "show health"
   # pxname        svname               status  weight
@@ -334,9 +334,6 @@ Examples
 Contributors
 ------------
 
-Ordered by date of first contribution.
-[Auto-generated](http://github.com/dtrejo/node-authors) on Thu Aug 16 2012 15:45:25 GMT-0700 (PDT).
-
 - [flores aka `flores`](https://github.com/flores)
 - [Scott Gonyea aka `sgonyea`](https://github.com/sgonyea)
 - [Ben Lovett aka `blovett`](https://github.com/blovett)
@@ -345,6 +342,8 @@ Ordered by date of first contribution.
 - [Erik Osterman aka `osterman`](https://github.com/osterman)
 - [Martin Hald aka `mhald`](https://github.com/mhald)
 - [deniedboarding](https://github.com/deniedboarding)
+- [Aaron Blew](https://github.com/blewa)
+- [Nick Griffiths](https://github.com/nicobrevin)
 
 License
 -----------------
