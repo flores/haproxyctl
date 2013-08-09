@@ -6,7 +6,7 @@
 # quick and dirty (but sometimes handy) installer.
 #
 
-HAPROXYVER="1.4.23"
+HAPROXYVER="1.4.24"
 STARTINGDIR=$PWD
 
 # make sure we have make, pcre and junk
