@@ -11,6 +11,9 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 
 [Here](http://scale10x.biggiantnerds.com) is a presentation about it.
 
+Be aware that HAProxy 1.3 does not support many of the options below.  We recommend
+you use HAProxy 1.4 or later.
+
 Installation
 ------------
 
