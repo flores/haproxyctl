@@ -16,15 +16,13 @@ Installation
 ------------
 
 On most UNIX, assuming HAProxy is in the $PATH:
-
 <pre>  
 git clone git@github.com:flores/haproxyctl.git
 ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
 </pre>
 
 For chkconfig/RedHat/Centos, add:
-
-<pre>  
+<pre>
 chkconfig --add haproxyctl
 </pre>
 
