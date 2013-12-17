@@ -18,14 +18,14 @@ Installation
 On most UNIX, assuming HAProxy is in the $PATH:
 
 <pre>  
-  git clone git@github.com:flores/haproxyctl.git
-  ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
+git clone git@github.com:flores/haproxyctl.git
+ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
 </pre>
 
 For chkconfig/RedHat/Centos, add:
 
 <pre>  
-  chkconfig --add haproxyctl
+chkconfig --add haproxyctl
 </pre>
 
 There is also an HAProxy source installation script.  This installs not only the steps above but latest HAProxy sources!
