@@ -11,20 +11,22 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 
 [Here](http://scale10x.biggiantnerds.com) is a presentation about it.
 
-Be aware that HAProxy 1.3 does not support many of the options below.  We recommend
-you use HAProxy 1.4 or later.
 
 Installation
 ------------
 
 On most UNIX, assuming HAProxy is in the $PATH:
-  
+
+<pre>  
   git clone git@github.com:flores/haproxyctl.git
   ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
+</pre>
 
 For chkconfig/RedHat/Centos, add:
-  
+
+<pre>  
   chkconfig --add haproxyctl
+</pre>
 
 There is also an HAProxy source installation script.  This installs not only the steps above but latest HAProxy sources!
 
@@ -347,6 +349,13 @@ Contributors
 - [deniedboarding](https://github.com/deniedboarding)
 - [Aaron Blew aka `blewa`](https://github.com/blewa)
 - [Nick Griffiths aka `nicobrevin`](https://github.com/nicobrevin)
+
+
+Non-current HAProxy versions 
+------------
+Be aware that HAProxy below current stable (1.4) does not support many of the 
+options of haproxyctl.
+
 
 License
 -----------------
