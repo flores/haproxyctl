@@ -33,25 +33,25 @@ module HAProxyCTL
         end
       end
 
-      return(@exec)
+      (@exec)
     end
 
     def socket
       @socket ||= begin
         config.match /stats\s+socket \s*([^\s]*)/
-        $1 || raise("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+        Regexp.last_match[1] || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
 
     def pidfile
       if config.match(/pidfile \s*([^\s]*)/)
-        @pidfile = $1
+        @pidfile = Regexp.last_match[1]
       else
-        std_pid = "/var/run/haproxy.pid"
+        std_pid = '/var/run/haproxy.pid'
         if File.exists?(std_pid)
           @pidfile = std_pid
         else
-          raise("Expecting 'pidfile <pid_file_path>' in #{config_path} or a pid file in #{std_pid}")
+          fail("Expecting 'pidfile <pid_file_path>' in #{config_path} or a pid file in #{std_pid}")
         end
       end
     end
@@ -68,6 +68,6 @@ module HAProxyCTL
         return pid
       end
     end
-    alias :pidof :check_running
+    alias_method :pidof, :check_running
   end
 end

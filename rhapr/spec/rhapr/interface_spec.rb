@@ -1,21 +1,20 @@
 require 'spec_helper'
 
 describe Rhapr::Interface do
-  let(:basic_info) {
+  let(:basic_info) do
     "Name: HAProxy\nVersion: 1.4.15\nRelease_date: 2011/04/08\nNbproc: 1\nProcess_num: 1\nPid: 97413\nUptime: 0d 18h43m53s\n"   <<
     "Uptime_sec: 67433\nMemmax_MB: 0\nUlimit-n: 2066\nMaxsock: 2066\nMaxconn: 1024\nMaxpipes: 0\nCurrConns: 1\nPipesUsed: 0\n"  <<
     "PipesFree: 0\nTasks: 7\nRun_queue: 1\nnode: skg.local\ndescription: \n"
-  }
+  end
 
-  let(:basic_stat) {
-    "# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,"           <<
-    "chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,"  <<
+  let(:basic_stat) do
+    '# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,'           <<
+    'chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,'  <<
     "hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,\nsrv,FRONTEND,"        <<
     ",,0,0,2000,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,1,0,,,,0,0,0,0,,,,,,,,,,,0,0,0,,,\nsrv,srv1,0,0,0,0,20,0,0,0,,0,,0,0,0,0,DOWN,1,1,0,"          <<
     "0,1,72468,72468,,1,1,1,,0,,2,0,,0,L4CON,,0,,,,,,,0,,,,0,0,\nsrv,srv2,0,0,0,0,20,0,0,0,,0,,0,0,0,0,DOWN,1,1,0,0,1,72465,72465,,"          <<
     "1,1,2,,0,,2,0,,0,L4CON,,0,,,,,,,0,,,,0,0,\n"
-  }
-
+  end
 
   subject { Rhapr::Interface.new }
 
@@ -46,7 +45,7 @@ describe Rhapr::Interface do
       stats = subject.show_stat
 
       stats.should be_a(Array)
-      stats.each{|stat| stat.should be_a(Hash) }
+      stats.each { |stat| stat.should be_a(Hash) }
     end
 
     it 'should strip the "# " from the beginning of the headers, before calling CSV.parse' do
@@ -70,9 +69,9 @@ describe Rhapr::Interface do
     it 'should raise an error if the specific backend+server is not known to HAProxy' do
       subject.should_receive(:send).with('get weight test/test9').and_return('No such server.')
 
-      lambda {
+      lambda do
         subject.get_weight('test', 'test9')
-      }.should raise_error(ArgumentError, "HAProxy did not recognize the specified Backend/Server. Response from HAProxy: No such server.")
+      end.should raise_error(ArgumentError, 'HAProxy did not recognize the specified Backend/Server. Response from HAProxy: No such server.')
     end
   end
 

@@ -6,14 +6,14 @@ module HAProxyCTL
   include Environment
 
   def start
-    puts "starting haproxy..."
+    puts 'starting haproxy...'
     system("#{exec} -f #{config_path} -D -p #{pidfile}")
-    newpid = check_running()
-    if ( newpid =~ /^\d+$/ )
+    newpid = check_running
+    if newpid =~ /^\d+$/
       puts "haproxy is running on pid #{newpid}"
       return true
     else
-      puts "error.  haproxy did not start!"
+      puts 'error. haproxy did not start!'
       return nil
     end
   end
@@ -22,39 +22,38 @@ module HAProxyCTL
     if pid
       puts "stopping haproxy on pid #{pid}..."
       system("kill #{pid}") || system("kill -9 #{pid}")
-      puts "... stopped"
+      puts '... stopped'
     else
-      puts "haproxy is not running!"
+      puts 'haproxy is not running!'
     end
   end
 
   def reload(pid)
-    if ( pid )
+    if pid
       puts "gracefully stopping connections on pid #{pid}..."
       system("#{exec} -f #{config_path} -sf #{pid}")
       puts "checking if connections still alive on #{pid}..."
-      nowpid = check_running()
-      while ( pid == nowpid )
+      nowpid = check_running
+      while  pid == nowpid
         puts "still haven't killed old pid.
                             waiting 2s for existing connections to die...
                             (ctrl+c to stop this check)"
         sleep 2
-        nowpid = check_running() || 0
+        nowpid = check_running || 0
       end
       puts "reloaded haproxy on pid #{nowpid}"
     else
-      puts "haproxy is not running!"
+      puts 'haproxy is not running!'
     end
   end
 
   def unixsock(command)
-
-    output=[]
+    output = []
     runs = 0
-      
-    begin 
-      ctl=UNIXSocket.open(socket)
-      if (ctl)
+
+    begin
+      ctl = UNIXSocket.open(socket)
+      if ctl
         ctl.write "#{command}\r\n"
       else
         puts "cannot talk to #{socket}"
@@ -63,21 +62,21 @@ module HAProxyCTL
       ctl.close
       sleep 0.5
       runs += 1
-      if ( runs < 4 )
+      if  runs < 4
         retry
       else
         puts "the unix socket at #{socket} closed before we could complete this request"
         exit
       end
     end
-    while (line = ctl.gets) do
-      unless ( line =~ /Unknown command/ )
+    while (line = ctl.gets)
+      unless  line =~ /Unknown command/
         output << line
       end
     end
     ctl.close
 
-    return output
+    output
   end
 
   def display_usage!
@@ -87,7 +86,7 @@ module HAProxyCTL
 
   def usage
     <<-USAGE
-usage: #{$0} <argument>
+usage: #{$PROGRAM_NAME} <argument>
   where <argument> can be:
     start                       : start haproxy unless it is already running
     stop                        : stop an existing haproxy
