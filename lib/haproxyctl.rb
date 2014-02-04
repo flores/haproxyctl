@@ -9,11 +9,11 @@ module HAProxyCTL
     puts 'starting haproxy...'
     system("#{exec} -f #{config_path} -D -p #{pidfile}")
     newpid = check_running
-    if  newpid =~ /^\d+$/
+    if newpid =~ /^\d+$/
       puts "haproxy is running on pid #{newpid}"
       return true
     else
-      puts 'error.  haproxy did not start!'
+      puts 'error. haproxy did not start!'
       return nil
     end
   end
@@ -29,7 +29,7 @@ module HAProxyCTL
   end
 
   def reload(pid)
-    if  pid
+    if pid
       puts "gracefully stopping connections on pid #{pid}..."
       system("#{exec} -f #{config_path} -sf #{pid}")
       puts "checking if connections still alive on #{pid}..."
