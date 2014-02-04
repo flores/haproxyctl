@@ -12,12 +12,12 @@ module Rhapr
         @config_path = ENV['HAPROXY_CONFIG']
       else
         config_paths = %w{/etc/haproxy/haproxy.cfg /etc/haproxy.cfg /usr/local/etc/haproxy.cfg}
-        config_paths.select!{|cfg| File.exists?(cfg)}
+        config_paths.select! { |cfg| File.exists?(cfg) }
 
         @config_path = config_paths.first
       end
 
-      return(@config_path)
+      (@config_path)
     end
 
     # @return [String] The raw contents of the HAProxy configuration file.
@@ -52,7 +52,7 @@ module Rhapr
         end
       end
 
-      return(@exec)
+      (@exec)
     end
 
     # @return [UNIXSocket] A connection to the HAProxy Socket
@@ -71,7 +71,7 @@ module Rhapr
     def socket_path
       @socket_path  ||= begin
                           config.match /stats\s+socket\s+([^\s]*)/
-                          $1 || raise(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+                          Regexp.last_match[1] || fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
                         end
     end
 
@@ -81,7 +81,7 @@ module Rhapr
     def pid
       @pid  ||= begin
                   config.match /pidfile ([^\s]*)/
-                  $1 || '/var/run/haproxy.pid'
+                  Regexp.last_match[1] || '/var/run/haproxy.pid'
                 end
     end
 
@@ -94,6 +94,6 @@ module Rhapr
 
       return pidof unless pidof.empty?
     end
-    alias :pidof :check_running
+    alias_method :pidof, :check_running
   end
 end
