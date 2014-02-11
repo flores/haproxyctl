@@ -8,7 +8,7 @@ module ConfigFixtures
   def fixture_for(sym)
     config_fixtures[sym][:fixture]
   end
-  alias :config_for :fixture_for
+  alias_method :config_for, :fixture_for
 
   def path_for(sym)
     config_fixtures[sym][:path]
@@ -17,20 +17,20 @@ module ConfigFixtures
   # @see ConfigFixtures#create_fixture_hash
   def config_fixtures
     @config_fixtures ||= begin
-      hash = Hash.new {|k,v| k[v] = {}}
+      hash = Hash.new { |k, v| k[v] = {} }
       hash.merge!(create_fixture_hash)
     end
   end
 
   # @return [Hash{Symbol => String}]
   def create_fixture_hash
-    Hash[ find_fixtures.map{|fpath| map_fixture(fpath) } ]
+    Hash[ find_fixtures.map { |fpath| map_fixture(fpath) }]
   end
 
   # @param [String]
   # @return [Array<Symbol, String>]
   def map_fixture(fpath)
-    [symbolize_filename(fpath), {:path => fpath, :fixture => read_file(fpath)}]
+    [symbolize_filename(fpath), { path: fpath, fixture: read_file(fpath) }]
   end
 
   # @return [Array<String>]

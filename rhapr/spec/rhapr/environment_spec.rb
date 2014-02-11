@@ -49,9 +49,9 @@ describe Rhapr::Environment do
     it 'should raise an exception if it cannot read from #config_path' do
       File.should_receive(:read).and_raise(Errno::ENOENT)
 
-      lambda {
+      lambda do
         @env_test.config
-      }.should raise_error(RuntimeError)
+      end.should raise_error(RuntimeError)
     end
 
     it 'should read and return the contents of a file' do
@@ -106,9 +106,9 @@ describe Rhapr::Environment do
     it 'should raise an error if it cannot derive an io socket from the config file' do
       @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
 
-      lambda {
+      lambda do
         @env_test.socket_path
-      }.should raise_error(RuntimeError)
+      end.should raise_error(RuntimeError)
     end
   end
 
