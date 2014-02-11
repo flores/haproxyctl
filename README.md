@@ -347,6 +347,7 @@ Contributors
 - [deniedboarding](https://github.com/deniedboarding)
 - [Aaron Blew aka `blewa`](https://github.com/blewa)
 - [Nick Griffiths aka `nicobrevin`](https://github.com/nicobrevin)
+- [Florian Holzhauer aka `fh`](https://github.com/fh)
 
 
 Non-current HAProxy versions 
