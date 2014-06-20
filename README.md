@@ -353,7 +353,7 @@ Contributors
 
 Non-current HAProxy versions 
 ------------
-Be aware that HAProxy below current stable (1.4) does not support many of the 
+Be aware that HAProxy below version 1.4 does not support many of the 
 options of haproxyctl.
 
 

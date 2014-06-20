@@ -6,7 +6,8 @@
 # quick and dirty (but sometimes handy) installer.
 #
 
-HAPROXYVER="1.4.24"
+HAPROXYVER="1.5.0"
+MD5EXPECTED="e33bb97e644e98af948090f1ecebbda9"
 STARTINGDIR=$PWD
 
 # make sure we have make, pcre and junk
@@ -31,7 +32,7 @@ fi
 # grab last stable.  HAProxy's site versions nicely - these will still be here after the next update
 mkdir /usr/local/src || echo "Oops, /usr/local/src exists!"
 cd /usr/local/src || exit 2
-wget http://haproxy.1wt.eu/download/1.4/src/haproxy-$HAPROXYVER.tar.gz
+wget http://haproxy.1wt.eu/download/1.5/src/haproxy-$HAPROXYVER.tar.gz
 
 # get rid of an existing haproxy
 if [ -e /usr/local/haproxy ]; then
@@ -40,7 +41,7 @@ fi
 
 # check the checksum
 MD5CHECK=`md5sum /usr/local/src/haproxy-$HAPROXYVER.tar.gz |awk '{print $1}'`
-if [ "$MD5CHECK" != "6535d5e58037ada4b58b439cebe03c79" ] ; then
+if [ ${MD5CHECK} != ${MD5EXPECTED} ] ; then
         echo -e "MD5s do not match!\nBailing.";
         exit 2;
 fi
