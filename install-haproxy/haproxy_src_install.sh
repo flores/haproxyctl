@@ -70,21 +70,25 @@ echo "Make installing!"
 make install
 
 if [[ -e /usr/sbin/haproxy ]]; then
+  echo "Removing /usr/sbin/haproxy"
   rm -f /usr/sbin/haproxy
 fi
 
+echo "Symlinking /usr/local/sbin/haproxy to /usr/sbin/haproxy"
 ln -s /usr/local/sbin/haproxy /usr/sbin/haproxy
 
-# grab haproxyctl script/init
+echo "Grabbing latest haproxyctl"
 if [[ -e /usr/local/haproxyctl ]]; then
   cd /usr/local/haproxyctl;
   git pull;
 else
   git clone https://github.com/flores/haproxyctl.git
-  ln -s /usr/local/haproxyctl/haproxyctl /etc/init.d/haproxyctl
 fi
 
-# remove make and gcc
+echo "dropping it into /etc/init.d/haproxyctl"
+ln -s /usr/local/haproxyctl/haproxyctl /etc/init.d/haproxyctl
+
+echo "removing make and gcc"
 if [[ ${OS} == 'redhat' ]]; then
   chkconfig --add haproxyctl;
   yum remove -y gcc make
@@ -92,6 +96,5 @@ elif [[ ${OS} == 'debian' ]]; then
   apt-get purge -y build-essential
 fi
 
-# back to where we started
 cd $STARTINGDIR
 echo "I think it is all done!"
