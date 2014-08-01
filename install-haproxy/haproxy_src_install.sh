@@ -82,11 +82,12 @@ if [[ -e /usr/local/haproxyctl ]]; then
   cd /usr/local/haproxyctl;
   git pull;
 else
+  cd /usr/local
   git clone https://github.com/flores/haproxyctl.git
 fi
 
 echo "dropping it into /etc/init.d/haproxyctl"
-ln -s /usr/local/haproxyctl/haproxyctl /etc/init.d/haproxyctl
+ln -s /usr/local/haproxyctl/haproxyctl /etc/init.d/haproxyctl || exit 2
 
 echo "removing make and gcc"
 if [[ ${OS} == 'redhat' ]]; then
