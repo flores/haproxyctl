@@ -26,7 +26,12 @@ For chkconfig/RedHat/Centos, add:
 chkconfig --add haproxyctl
 </pre>
 
-There is also an HAProxy source installation script.  This installs not only the steps above but latest HAProxy sources!
+Or if have RubyGems, just gem install it!
+<pre>
+gem install haproxyctl
+</pre>
+
+There is also an HAProxy source installation script.  This installs not only the steps above but also HAProxy itself.
 
 Options
 -----------------
