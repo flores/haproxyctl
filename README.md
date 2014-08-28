@@ -31,6 +31,11 @@ Or if have RubyGems, just gem install it!
 gem install haproxyctl
 </pre>
 
+Or if you are on Debian, just install haproxy with apt-get!
+<pre>
+apt-get install haproxyctl
+</pre>
+
 There is also an HAProxy source installation script.  This installs not only the steps above but also HAProxy itself.
 
 Options
