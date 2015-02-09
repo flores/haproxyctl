@@ -56,16 +56,16 @@ module HAProxyCTL
       end
     end
 
-    # @return [String, nil] Returns the PID of HAProxy as a string, if running. Nil otherwise.
+    # @return [Array, nil] Returns the PIDs of HAProxy as an Array, if running. Nil otherwise.
     def check_running
       if File.exists?(pidfile)
         pid = File.read(pidfile)
-        pid.strip!
+        pids = pid.strip.split("\n")
       end
 
-      # verify this pid exists and is haproxy
-      if pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/
-        return pid
+      # verify these pid(s) exists and are haproxy
+      if pids.all? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/ }
+        return pids
       end
     end
     alias_method :pidof, :check_running
