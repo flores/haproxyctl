@@ -31,7 +31,7 @@ module HAProxyCTL
   def reload(pids)
     if pids
       puts "gracefully stopping connections on pids #{pids.join(', ')}..."
-      pids.each { |pid| system("#{exec} -f #{config_path} -sf #{pid}") }
+      system("#{exec} -D -f #{config_path} -p #{pidfile} -sf $(cat #{pidfile})")
       puts "checking if connections still alive on #{pids.join(', ')}..."
       nowpids = check_running
       while pids == nowpids
