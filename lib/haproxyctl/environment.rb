@@ -36,9 +36,23 @@ module HAProxyCTL
       (@exec)
     end
 
+    def nbproc 
+      @nbproc ||= begin
+        config.match /nbproc \s*(\d*)\s*/
+        Regexp.last_match[1] || 1
+      end
+    end
+
     def socket
       @socket ||= begin
-        config.match /stats\s+socket \s*([^\s]*)/
+        # If the haproxy config is using nbproc > 1, we assume that all cores
+        # except for 1 do not need commands sent to their sockets (if they exist).
+        # This is a poor assumption, so TODO: improve CLI to accept argument for
+        # processes to target.
+        if nbproc > 1
+          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
+        else
+          config.match /stats\s+socket \s*([^\s]*)/
         Regexp.last_match[1] || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
