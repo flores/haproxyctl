@@ -39,7 +39,7 @@ module HAProxyCTL
     def nbproc 
       @nbproc ||= begin
         config.match /nbproc \s*(\d*)\s*/
-        Regexp.last_match[1] || 1
+        Regexp.last_match[1].to_i || 1
       end
     end
 
@@ -53,6 +53,7 @@ module HAProxyCTL
           config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
         else
           config.match /stats\s+socket \s*([^\s]*)/
+        end
         Regexp.last_match[1] || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
