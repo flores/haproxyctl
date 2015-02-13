@@ -9,7 +9,7 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 * Provides Nagios and Cloudkick health checks
 * chkconfig/service-able for Redhat folk
 
-[Here](http://scale10x.biggiantnerds.com) is a presentation about it.
+[Here](http://lo.ladevops.org/haproxyctl) is a presentation about it.  Hit space to advance slides.
 
 
 Installation
@@ -359,7 +359,7 @@ Contributors
 - [Nick Griffiths aka `nicobrevin`](https://github.com/nicobrevin)
 - [Florian Holzhauer aka `fh`](https://github.com/fh)
 - [Jonas Genannt aka `hggh`](https://github.com/hggh)
-
+- [Grant Shively aka `gshively11`](https://github.com/gshively11)
 
 Non-current HAProxy versions 
 ------------
