@@ -114,7 +114,7 @@ begin
       printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
   when /disable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
+    servername = Regexp.last_match(1)
     status = unixsock('show stat')
     backend = status.grep(/#{servername}/)
     backend.each do |line|
@@ -127,7 +127,7 @@ begin
       end
     end
   when /disable all (.+)/
-    servername = Regexp.last_match[ 1]
+    servername = Regexp.last_match(1)
     status = unixsock('show stat')
     status.each do |line|
       data = line.split(',')
@@ -136,7 +136,7 @@ begin
       end
     end
   when /enable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
+    servername = Regexp.last_match(1)
     status = unixsock('show stat')
     backend = status.grep(/#{servername}/)
     backend.each do |line|
@@ -149,7 +149,7 @@ begin
       end
     end
   when /show stat (.+)/
-    fieldnames = Regexp.last_match[ 1]
+    fieldnames = Regexp.last_match(1)
     status = unixsock('show stat')
     indices = fieldnames.split(' ').map do |name|
       status.first.split(',').index(name) || begin
@@ -164,7 +164,7 @@ begin
       puts (row[0...2] + filtered).compact.join(',')
     end
   when /enable all (.+)/
-    servername = Regexp.last_match[ 1]
+    servername = Regexp.last_match(1)
     status = unixsock('show stat')
     status.each do |line|
       data = line.split(',')

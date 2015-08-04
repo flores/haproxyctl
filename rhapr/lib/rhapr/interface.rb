@@ -68,7 +68,7 @@ module Rhapr
       resp = send "get weight #{backend}/#{server}"
 
       resp.match /([[:digit:]]+) \(initial ([[:digit:]]+)\)/
-      weight, initial = Regexp.last_match[1], Regexp.last_match[2]
+      weight, initial = Regexp.last_match(1), Regexp.last_match(2)
 
       return [weight.to_i, initial.to_i] if weight and initial
 
