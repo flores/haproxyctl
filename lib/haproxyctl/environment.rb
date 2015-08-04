@@ -39,7 +39,7 @@ module HAProxyCTL
     def nbproc 
       @nbproc ||= begin
         config.match /nbproc \s*(\d*)\s*/
-        Regexp.last_match[1].to_i || 1
+        Regexp.last_match(1).to_i || 1
       end
     end
 
@@ -54,13 +54,13 @@ module HAProxyCTL
         else
           config.match /stats\s+socket \s*([^\s]*)/
         end
-        Regexp.last_match[1] || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+        Regexp.last_match(1) || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
 
     def pidfile
       if config.match(/pidfile \s*([^\s]*)/)
-        @pidfile = Regexp.last_match[1]
+        @pidfile = Regexp.last_match(1)
       else
         std_pid = '/var/run/haproxy.pid'
         if File.exists?(std_pid)

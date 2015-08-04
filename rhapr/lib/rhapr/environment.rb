@@ -71,7 +71,7 @@ module Rhapr
     def socket_path
       @socket_path  ||= begin
                           config.match /stats\s+socket\s+([^\s]*)/
-                          Regexp.last_match[1] || fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+                          Regexp.last_match(1) || fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
                         end
     end
 
@@ -81,7 +81,7 @@ module Rhapr
     def pid
       @pid  ||= begin
                   config.match /pidfile ([^\s]*)/
-                  Regexp.last_match[1] || '/var/run/haproxy.pid'
+                  Regexp.last_match(1) || '/var/run/haproxy.pid'
                 end
     end
 
