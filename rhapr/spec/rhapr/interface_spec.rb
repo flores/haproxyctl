@@ -22,7 +22,7 @@ describe Rhapr::Interface do
     it 'should send the "clear counters" message to HAProxy' do
       subject.should_receive(:send).with('clear counters').and_return("\n")
 
-      subject.clear_counters.should be_true
+      subject.clear_counters.should be true
     end
   end
 
