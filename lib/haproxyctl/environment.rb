@@ -43,19 +43,12 @@ module HAProxyCTL
       end
     end
 
-    def socket
-      @socket ||= begin
-        # If the haproxy config is using nbproc > 1, we assume that all cores
-        # except for 1 do not need commands sent to their sockets (if they exist).
-        # This is a poor assumption, so TODO: improve CLI to accept argument for
-        # processes to target.
-        if nbproc > 1
-          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
-        else
-          config.match /stats\s+socket \s*([^\s]*)/
-        end
-        Regexp.last_match(1) || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
-      end
+    def sockets
+      # Always capture socket path, and include process id if it exists.
+      # Note: whoever runs haproxy with nbprocs > 1 and has a socket listener without process id .. can blame themself.
+      @sockets = Hash[config.scan(/stats\s+socket\s+([^\[\s\]]*)(?:(?:.*process)?(?:.*process\s+([^\[\s\]]*)))?/).collect { |v| [v[1].to_i,v[0]] }]
+      @sockets.empty? && fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+      @sockets
     end
 
     def pidfile
