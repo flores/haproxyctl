@@ -127,6 +127,6 @@ describe Rhapr::Environment do
   end
 
   describe '#check_running, #pidof' do
-    pending 'TBD'
+    skip 'TBD'
   end
 end
