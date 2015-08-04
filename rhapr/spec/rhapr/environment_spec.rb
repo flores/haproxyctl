@@ -20,14 +20,14 @@ describe Rhapr::Environment do
     end
 
     it 'should go down a list of pre-defined file names' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
 
       @env_test.config_path.should == '/etc/haproxy.cfg'
     end
 
     it 'should select the first configuration found, from the pre-defined list' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy/haproxy.cfg').and_return(true)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
 
@@ -35,14 +35,14 @@ describe Rhapr::Environment do
     end
 
     it 'should be nil if config files do not exist and $HAPROXY_CONFIG is not set' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       @env_test.config_path.should be_nil
     end
   end
 
   describe '#config' do
     before(:each) do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
     end
 
