@@ -96,19 +96,39 @@ describe Rhapr::Environment do
     it 'should establish a socket connection with HAProxy'
   end
 
-  describe '#socket_path' do
-    it 'should parse out the io socket from the config file' do
-      @env_test.should_receive(:config).and_return(config_for(:basic_haproxy))
+  describe '#socket_paths' do
+    context 'with basic haproxy config' do
+      it 'should parse out the io socket from the config file' do
+        @env_test.should_receive(:config).and_return(config_for(:basic_haproxy))
 
-      @env_test.socket_path.should == '/tmp/haproxy'
+        @env_test.socket_paths.should == Hash[0, '/tmp/haproxy']
+      end
+
+      it 'should raise an error if it cannot derive an io socket from the config file' do
+        @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
+
+        lambda do
+          @env_test.socket_paths
+        end.should raise_error(RuntimeError)
+      end
+      it 'it should always be a Hash if sockets exists' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+
+        @env_test.socket_paths.should be_a_kind_of(Hash)
+      end
     end
 
-    it 'should raise an error if it cannot derive an io socket from the config file' do
-      @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
+    context 'with nbprocs haproxy config' do
 
-      lambda do
-        @env_test.socket_path
-      end.should raise_error(RuntimeError)
+      it 'should contain 2 elements' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+        @env_test.socket_paths.length.should == 2
+      end
+
+      it 'proccess id is used for keys and socket path as values' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+        @env_test.socket_paths.should == Hash[4 => '/tmp/haproxy-1', 5 => '/tmp/haproxy-2']
+      end
     end
   end
 

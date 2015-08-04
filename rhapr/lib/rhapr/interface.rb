@@ -7,10 +7,11 @@ module Rhapr
     EMPTY = "\n"
 
     # @param [String, #to_s] message The message to be sent to HAProxy
+    # @param [int] process id for retrieving correct stats socket
     # return [Array<String>] All of the output from HAProxy, read in.
     # @see Rhapr::Interface#write, Rhapr::Interface#read_full
-    def send(message)
-      sock = socket
+    def send(message, process=1)
+      sock = socket(process)
 
       write(sock, message)
       read_full(sock)

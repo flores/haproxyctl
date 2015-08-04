@@ -2,7 +2,7 @@ require 'socket'
 
 module Rhapr
   module Environment
-    attr_reader :haproxy_pid, :config_path, :config, :exec, :socket_path
+    attr_reader :haproxy_pid, :config_path, :config, :exec, :socket_paths
 
     # @return [String, nil] The path to the HAProxy configuration file, or nil if not found. Set the ENV variable $HAPROXY_CONFIG to override defaults.
     def config_path
@@ -55,24 +55,26 @@ module Rhapr
       (@exec)
     end
 
+    # @param [int] process id for looking up correct socket path
     # @return [UNIXSocket] A connection to the HAProxy Socket
     # @raise [RuntimeError] Raised if a socket connection could not be established
-    def socket
+    def socket(process)
       begin
-        UNIXSocket.open(socket_path)
+        UNIXSocket.open(socket_paths[process])
       rescue Errno::EACCES => e
         raise RuntimeError.new("Could not open a socket with HAProxy. Error message: #{e.message}")
       end
     end
 
-    # @return [String] The path to the HAProxy stats socket.
+    # @return [Array] Entries of [ProcessNumber, Path] for HAProxy stats sockets. ProcessNumber can be 0 if not bound to any.
     # @raise [RuntimeError] Raised if no stats socket has been specified, in the HAProxy configuration.
     # @todo: Should there be an ENV var for this? Perhaps allow config-less runs of rhapr?
-    def socket_path
-      @socket_path  ||= begin
-                          config.match /stats\s+socket\s+([^\s]*)/
-                          Regexp.last_match(1) || fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
-                        end
+    def socket_paths
+      # Always capture socket path, and include process id if it exists.
+      # Note: whoever runs haproxy with nbprocs > 1 and has a socket listener without process id .. can blame themself.
+      @socket_paths = Hash[config.scan(/stats\s+socket\s+([^[\s]]*)(?:(?:.*process)?(?:.*process\s+([^[\s]]*)))?/).collect { |v| [v[1].to_i,v[0]] }]
+      @socket_paths.empty? && fail(RuntimeError.new "Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
+      @socket_paths
     end
 
     # @return [String] Returns the path to the pidfile, specified in the HAProxy configuration. Returns an assumption, if not found.
