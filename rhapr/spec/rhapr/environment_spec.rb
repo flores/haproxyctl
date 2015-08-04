@@ -55,7 +55,7 @@ describe Rhapr::Environment do
     end
 
     it 'should read and return the contents of a file' do
-      File.should_receive(:read).and_return { "I can haz cfg ?\n" }
+      File.should_receive(:read).and_return("I can haz cfg ?\n")
 
       @env_test.config.should == "I can haz cfg ?\n"
     end
@@ -98,13 +98,13 @@ describe Rhapr::Environment do
 
   describe '#socket_path' do
     it 'should parse out the io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:basic_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:basic_haproxy))
 
       @env_test.socket_path.should == '/tmp/haproxy'
     end
 
     it 'should raise an error if it cannot derive an io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
 
       lambda do
         @env_test.socket_path
@@ -114,13 +114,13 @@ describe Rhapr::Environment do
 
   describe '#pid' do
     it 'should parse out the pidfile from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:pid_test_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:pid_test_haproxy))
 
       @env_test.pid.should == '/some/other/run/haproxy.pid'
     end
 
     it 'should return a default path if it cannot derive an io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
 
       @env_test.pid.should == '/var/run/haproxy.pid'
     end
