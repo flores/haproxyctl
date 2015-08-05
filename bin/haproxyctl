@@ -45,6 +45,15 @@ end
 # Strip of the -p <process> argument as argument is passed to unix socket if not defined below
 argument = argument.gsub(/-p\s*([^\[\s\]]*)/, '')
 
+# For all data fetching logic below, we need to strip ^\d+:\s if dsh_output
+dsh_output ||= begin
+            if process == 0
+              1
+            else
+              0
+            end
+          end
+
 begin
   case argument
   when 'start'
@@ -122,13 +131,15 @@ begin
     status = unixsock(process, 'show stat')
     status.each do |line|
       data = line.split(',')
-      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
+      dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+      printf "%-30s %-30s %-7s %3s\n", dsh_data0, data[1], data[17], data[18]
     end
   when /show backend(s?)/
     status = unixsock(process, 'show stat').grep(/BACKEND/)
     status.each do |line|
       data = line.split(',')
-      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
+      dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+      printf "%-30s %-30s %-7s %3s\n", dsh_data0, data[1], data[17], data[18]
     end
   when /disable all EXCEPT (.+)/
     servername = Regexp.last_match(1)
@@ -138,8 +149,9 @@ begin
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
-          unixsock(process, "disable server #{data[0]}/#{data[1]}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        if  (dsh_data0 == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
+          unixsock(process, "disable server #{dsh_data0}/#{data[1]}")
         end
       end
     end
@@ -149,7 +161,8 @@ begin
     status.each do |line|
       data = line.split(',')
       if  ( data[1] == servername) && ( data[17] == 'UP')
-        unixsock(process, "disable server #{data[0]}/#{servername}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        unixsock(process, "disable server #{dsh_data0}/#{servername}")
       end
     end
   when /enable all EXCEPT (.+)/
@@ -160,8 +173,9 @@ begin
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
-          unixsock(process, "enable server #{data[0]}/#{data[1]}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        if  (dsh_data0 == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
+          unixsock(process, "enable server #{dsh_data0}/#{data[1]}")
         end
       end
     end
@@ -186,7 +200,8 @@ begin
     status.each do |line|
       data = line.split(',')
       if  ( data[1] == servername) && ( data[17] =~ /Down|MAINT/i)
-        unixsock(process, "enable server #{data[0]}/#{servername}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        unixsock(process, "enable server #{dsh_data0}/#{servername}")
       end
     end
   when 'version'
