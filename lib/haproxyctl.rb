@@ -85,7 +85,7 @@ module HAProxyCTL
       if nbproc > 1
         # Only multiple socket execution prefixes lines with process id
         # - inspired from dsh.
-        sockets().each.sort.map{|k,v| execute(v, command).map { |line| "#{k}: #{line}" }}
+        sockets().each.sort.map{|k,v| execute(v, command).map { |line| "#{k}: #{line}" }}.flatten
       else
         execute(sockets()[0], command)
       end
