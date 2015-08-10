@@ -43,7 +43,7 @@ elsif process.empty?
   end
 end
 # Strip of the -p <process> argument as argument is passed to unix socket if not defined below
-argument = argument.gsub(/-p\s*([^\[\s\]]*)/, '')
+argument = argument.gsub(/-p\s*([^\[\s\]]*)\s/, '')
 
 # For all data fetching logic below, we need to strip ^\d+:\s if dsh_output
 dsh_output ||= begin
