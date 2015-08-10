@@ -28,6 +28,32 @@ end
 
 display_usage! if argument =~ /help/ || ARGV.length < 1
 
+
+process ||= argument.scan(/-p\s*([^\[\s\]]+)/).flatten
+
+if !process.empty?
+  process = process[0].to_i
+elsif process.empty?
+  if nbproc > 1
+    # Default to old behavior to use the first socket.
+    process = 1
+  else
+    # Default to unix socket not bound to a process id.
+    process = 0
+  end
+end
+# Strip of the -p <process> argument as argument is passed to unix socket if not defined below
+argument = argument.gsub(/-p\s*([^\[\s\]]*)\s/, '')
+
+# For all data fetching logic below, we need to strip ^\d+:\s if dsh_output
+dsh_output ||= begin
+            if process == 0
+              1
+            else
+              0
+            end
+          end
+
 begin
   case argument
   when 'start'
@@ -87,7 +113,7 @@ begin
     #   # removes the listener
     #   conn = conn - 1
     #   puts "metric connections int #{conn}"
-    #   status = unixsock('show stat')
+    #   status = unixsock(process, 'show stat')
     #   status.each do |line|
     #     line = line.split(',')
     #     if line[0] !~ /^#/
@@ -102,55 +128,58 @@ begin
     #   puts 'status err haproxy is not running!'
     # end
   when 'show health'
-    status = unixsock('show stat')
+    status = unixsock(process, 'show stat')
     status.each do |line|
       data = line.split(',')
       printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
   when /show backend(s?)/
-    status = unixsock('show stat').grep(/BACKEND/)
+    status = unixsock(process, 'show stat').grep(/BACKEND/)
     status.each do |line|
       data = line.split(',')
       printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
   when /disable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+    servername = Regexp.last_match(1)
+    status = unixsock(process, 'show stat')
     backend = status.grep(/#{servername}/)
     backend.each do |line|
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
-          unixsock("disable server #{data[0]}/#{data[1]}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        if  (dsh_data0 == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
+          unixsock(process, "disable server #{dsh_data0}/#{data[1]}")
         end
       end
     end
   when /disable all (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+    servername = Regexp.last_match(1)
+    status = unixsock(process, 'show stat')
     status.each do |line|
       data = line.split(',')
       if  ( data[1] == servername) && ( data[17] == 'UP')
-        unixsock("disable server #{data[0]}/#{servername}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        unixsock(process, "disable server #{dsh_data0}/#{servername}")
       end
     end
   when /enable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+    servername = Regexp.last_match(1)
+    status = unixsock(process, 'show stat')
     backend = status.grep(/#{servername}/)
     backend.each do |line|
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
-          unixsock("enable server #{data[0]}/#{data[1]}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        if  (dsh_data0 == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
+          unixsock(process, "enable server #{dsh_data0}/#{data[1]}")
         end
       end
     end
   when /show stat (.+)/
-    fieldnames = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+    fieldnames = Regexp.last_match(1)
+    status = unixsock(process, 'show stat')
     indices = fieldnames.split(' ').map do |name|
       status.first.split(',').index(name) || begin
         $stderr.puts("no such field: #{name}")
@@ -164,18 +193,19 @@ begin
       puts (row[0...2] + filtered).compact.join(',')
     end
   when /enable all (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+    servername = Regexp.last_match(1)
+    status = unixsock(process, 'show stat')
     status.each do |line|
       data = line.split(',')
       if  ( data[1] == servername) && ( data[17] =~ /Down|MAINT/i)
-        unixsock("enable server #{data[0]}/#{servername}")
+        dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
+        unixsock(process, "enable server #{dsh_data0}/#{servername}")
       end
     end
   when 'version'
     version
   else
-    puts unixsock(argument)
+    puts unixsock(process, argument)
   end
 rescue Errno::ENOENT => e
   STDERR.puts e

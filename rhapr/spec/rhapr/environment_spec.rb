@@ -20,14 +20,14 @@ describe Rhapr::Environment do
     end
 
     it 'should go down a list of pre-defined file names' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
 
       @env_test.config_path.should == '/etc/haproxy.cfg'
     end
 
     it 'should select the first configuration found, from the pre-defined list' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy/haproxy.cfg').and_return(true)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
 
@@ -35,14 +35,14 @@ describe Rhapr::Environment do
     end
 
     it 'should be nil if config files do not exist and $HAPROXY_CONFIG is not set' do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       @env_test.config_path.should be_nil
     end
   end
 
   describe '#config' do
     before(:each) do
-      File.stub!(:exists?).and_return(false)
+      File.stub(:exists?).and_return(false)
       File.should_receive(:exists?).with('/etc/haproxy.cfg').and_return(true)
     end
 
@@ -55,7 +55,7 @@ describe Rhapr::Environment do
     end
 
     it 'should read and return the contents of a file' do
-      File.should_receive(:read).and_return { "I can haz cfg ?\n" }
+      File.should_receive(:read).and_return("I can haz cfg ?\n")
 
       @env_test.config.should == "I can haz cfg ?\n"
     end
@@ -96,37 +96,57 @@ describe Rhapr::Environment do
     it 'should establish a socket connection with HAProxy'
   end
 
-  describe '#socket_path' do
-    it 'should parse out the io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:basic_haproxy) }
+  describe '#socket_paths' do
+    context 'with basic haproxy config' do
+      it 'should parse out the io socket from the config file' do
+        @env_test.should_receive(:config).and_return(config_for(:basic_haproxy))
 
-      @env_test.socket_path.should == '/tmp/haproxy'
+        @env_test.socket_paths.should == Hash[0, '/tmp/haproxy']
+      end
+
+      it 'should raise an error if it cannot derive an io socket from the config file' do
+        @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
+
+        lambda do
+          @env_test.socket_paths
+        end.should raise_error(RuntimeError)
+      end
+      it 'it should always be a Hash if sockets exists' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+
+        @env_test.socket_paths.should be_a_kind_of(Hash)
+      end
     end
 
-    it 'should raise an error if it cannot derive an io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
+    context 'with nbprocs haproxy config' do
 
-      lambda do
-        @env_test.socket_path
-      end.should raise_error(RuntimeError)
+      it 'should contain 2 elements' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+        @env_test.socket_paths.length.should == 2
+      end
+
+      it 'proccess id is used for keys and socket path as values' do
+        @env_test.should_receive(:config).and_return(config_for(:nbprocs_haproxy))
+        @env_test.socket_paths.should == Hash[4 => '/tmp/haproxy-1', 5 => '/tmp/haproxy-2']
+      end
     end
   end
 
   describe '#pid' do
     it 'should parse out the pidfile from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:pid_test_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:pid_test_haproxy))
 
       @env_test.pid.should == '/some/other/run/haproxy.pid'
     end
 
     it 'should return a default path if it cannot derive an io socket from the config file' do
-      @env_test.should_receive(:config).and_return { config_for(:crappy_haproxy) }
+      @env_test.should_receive(:config).and_return(config_for(:crappy_haproxy))
 
       @env_test.pid.should == '/var/run/haproxy.pid'
     end
   end
 
   describe '#check_running, #pidof' do
-    pending 'TBD'
+    skip 'TBD'
   end
 end

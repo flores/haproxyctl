@@ -47,36 +47,55 @@ module HAProxyCTL
     end
   end
 
-  def unixsock(command)
-    output = []
-    runs = 0
+  def unixsock(process, command)
 
-    begin
-      ctl = UNIXSocket.open(socket)
-      if ctl
-        ctl.write "#{command}\r\n"
-      else
-        puts "cannot talk to #{socket}"
+    def execute(socket, command)
+      output = []
+      runs = 0
+
+      begin
+        ctl = UNIXSocket.open(socket)
+        if ctl
+          ctl.write "#{command}\r\n"
+        else
+          puts "cannot talk to #{socket}"
+        end
+      rescue Errno::EPIPE
+        ctl.close
+        sleep 0.5
+        runs += 1
+        if  runs < 4
+          retry
+        else
+          puts "the unix socket at #{socket} closed before we could complete this request"
+          exit
+        end
       end
-    rescue Errno::EPIPE
+      while (line = ctl.gets)
+        unless  line =~ /Unknown command/
+          output << line
+        end
+      end
       ctl.close
-      sleep 0.5
-      runs += 1
-      if  runs < 4
-        retry
-      else
-        puts "the unix socket at #{socket} closed before we could complete this request"
-        exit
-      end
-    end
-    while (line = ctl.gets)
-      unless  line =~ /Unknown command/
-        output << line
-      end
-    end
-    ctl.close
 
-    output
+      output
+    end
+
+    if process == 0
+      if nbproc > 1
+        # Only multiple socket execution prefixes lines with process id
+        # - inspired from dsh.
+        sockets().each.sort.map{|k,v| execute(v, command).map { |line| "#{k}: #{line}" }}.flatten
+      else
+        execute(sockets()[0], command)
+      end
+    else
+      if !sockets().has_key?(process)
+        fail(RuntimeError.new "Could not find a stats socket with process #{process} in #{config_path}")
+      else
+        execute(sockets()[process], command)
+      end
+    end
   end
 
   def display_usage!
