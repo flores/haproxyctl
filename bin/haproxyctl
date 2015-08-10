@@ -131,15 +131,13 @@ begin
     status = unixsock(process, 'show stat')
     status.each do |line|
       data = line.split(',')
-      dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
-      printf "%-30s %-30s %-7s %3s\n", dsh_data0, data[1], data[17], data[18]
+      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
   when /show backend(s?)/
     status = unixsock(process, 'show stat').grep(/BACKEND/)
     status.each do |line|
       data = line.split(',')
-      dsh_data0 ||= data[0].sub(/\d+:\s/, '') if dsh_output || data[0]
-      printf "%-30s %-30s %-7s %3s\n", dsh_data0, data[1], data[17], data[18]
+      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
   when /disable all EXCEPT (.+)/
     servername = Regexp.last_match(1)
