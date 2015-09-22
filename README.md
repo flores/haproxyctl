@@ -9,21 +9,34 @@ This is a simple wrapper to make life with HAProxy a little more convenient.
 * Provides Nagios and Cloudkick health checks
 * chkconfig/service-able for Redhat folk
 
-[Here](http://scale10x.biggiantnerds.com) is a presentation about it.
+[Here](http://lo.ladevops.org/haproxyctl) is a presentation about it.  Hit space to advance slides.
+
 
 Installation
 ------------
 
 On most UNIX, assuming HAProxy is in the $PATH:
-  
-  git clone git@github.com:flores/haproxyctl.git
-  ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
+<pre>
+git clone git@github.com:flores/haproxyctl.git
+ln -s haproxyctl/haproxyctl /etc/init.d/haproxyctl
+</pre>
 
 For chkconfig/RedHat/Centos, add:
-  
-  chkconfig --add haproxyctl
+<pre>
+chkconfig --add haproxyctl
+</pre>
 
-There is also an HAProxy source installation script.  This installs not only the steps above but latest HAProxy sources!
+Or if have RubyGems, just gem install it!
+<pre>
+gem install haproxyctl
+</pre>
+
+Or if you are on Debian, just install haproxy with apt-get!
+<pre>
+apt-get install haproxyctl
+</pre>
+
+There is also an HAProxy source installation script.  This installs not only the steps above but also HAProxy itself.
 
 Options
 -----------------
@@ -344,6 +357,15 @@ Contributors
 - [deniedboarding](https://github.com/deniedboarding)
 - [Aaron Blew aka `blewa`](https://github.com/blewa)
 - [Nick Griffiths aka `nicobrevin`](https://github.com/nicobrevin)
+- [Florian Holzhauer aka `fh`](https://github.com/fh)
+- [Jonas Genannt aka `hggh`](https://github.com/hggh)
+- [Grant Shively aka `gshively11`](https://github.com/gshively11)
+
+Non-current HAProxy versions 
+------------
+Be aware that HAProxy below version 1.4 does not support many of the 
+options of haproxyctl.
+
 
 License
 -----------------

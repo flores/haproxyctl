@@ -36,9 +36,24 @@ module HAProxyCTL
       (@exec)
     end
 
+    def nbproc 
+      @nbproc ||= begin
+        config.match /nbproc \s*(\d*)\s*/
+        Regexp.last_match[1].to_i || 1
+      end
+    end
+
     def socket
       @socket ||= begin
-        config.match /stats\s+socket \s*([^\s]*)/
+        # If the haproxy config is using nbproc > 1, we assume that all cores
+        # except for 1 do not need commands sent to their sockets (if they exist).
+        # This is a poor assumption, so TODO: improve CLI to accept argument for
+        # processes to target.
+        if nbproc > 1
+          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
+        else
+          config.match /stats\s+socket \s*([^\s]*)/
+        end
         Regexp.last_match[1] || fail("Expecting 'stats socket <UNIX_socket_path>' in #{config_path}")
       end
     end
@@ -56,16 +71,16 @@ module HAProxyCTL
       end
     end
 
-    # @return [String, nil] Returns the PID of HAProxy as a string, if running. Nil otherwise.
+    # @return [Array, nil] Returns the PIDs of HAProxy as an Array, if running. Nil otherwise.
     def check_running
       if File.exists?(pidfile)
         pid = File.read(pidfile)
-        pid.strip!
+        pids = pid.strip.split("\n")
       end
 
-      # verify this pid exists and is haproxy
-      if pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/
-        return pid
+      # verify these pid(s) exists and are haproxy
+      if pids and pids.all? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/ }
+        return pids
       end
     end
     alias_method :pidof, :check_running

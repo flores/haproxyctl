@@ -32,7 +32,7 @@ begin
   case argument
   when 'start'
     if pidof
-      fail("haproxy is already running on pid #{pidof}!")
+      fail("haproxy is already running on pid(s) #{pidof.join(', ')}!")
     else
       start
     end
@@ -61,8 +61,11 @@ begin
     end
   when 'status'
     if  pidof
-      puts "haproxy is running on pid #{pidof}.\nthese ports are used and guys are connected:"
-      system("lsof -ln -i |awk \'$2 ~ /#{pidof}/ {print $8\" \"$9}\'")
+      puts "haproxy is running on pid(s) #{pidof.join(', ')}.\nthese ports are used and guys are connected:"
+      pidof.each do |pid|
+        puts "Showing lsof for PID: #{pid}"
+        system("lsof -ln -i |awk \'$2 ~ /#{pid}/ {print $8\" \"$9}\'")  
+      end
     else
       puts 'haproxy is not running'
     end
@@ -77,26 +80,27 @@ begin
       exit(2)
     end
   when 'cloudkick'
-    if  pidof
-      puts 'status ok haproxy is running'
-      conn = `lsof -ln -i |grep -c #{pidof}`.chomp.to_i
-      # removes the listener
-      conn = conn - 1
-      puts "metric connections int #{conn}"
-      status = unixsock('show stat')
-      status.each do |line|
-        line = line.split(',')
-        if line[0] !~ /^#/
-          host = "#{line[0]}_#{line[1]}"
-          puts "metric #{host}_request_rate int #{line[47]}" if line[47].to_i > 0
-          puts "metric #{host}_total_requests gauge #{line[49]}" if line[49].to_i > 0
-          puts "metric #{host}_health_check_duration int #{line[35]}" if line[35].to_i > 0
-          puts "metric ${host}_current_queue int #{line[3]}" if line[3].to_i > 0
-        end
-      end
-    else
-      puts 'status err haproxy is not running!'
-    end
+    puts 'Not supported, need to refactor after pidof changes.'
+    # if  pidof
+    #   puts 'status ok haproxy is running'
+    #   conn = `lsof -ln -i |grep -c #{pidof}`.chomp.to_i
+    #   # removes the listener
+    #   conn = conn - 1
+    #   puts "metric connections int #{conn}"
+    #   status = unixsock('show stat')
+    #   status.each do |line|
+    #     line = line.split(',')
+    #     if line[0] !~ /^#/
+    #       host = "#{line[0]}_#{line[1]}"
+    #       puts "metric #{host}_request_rate int #{line[47]}" if line[47].to_i > 0
+    #       puts "metric #{host}_total_requests gauge #{line[49]}" if line[49].to_i > 0
+    #       puts "metric #{host}_health_check_duration int #{line[35]}" if line[35].to_i > 0
+    #       puts "metric ${host}_current_queue int #{line[3]}" if line[3].to_i > 0
+    #     end
+    #   end
+    # else
+    #   puts 'status err haproxy is not running!'
+    # end
   when 'show health'
     status = unixsock('show stat')
     status.each do |line|
