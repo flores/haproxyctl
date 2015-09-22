@@ -13,151 +13,171 @@
 
 require 'pathname'
 lib = File.join(File.dirname(Pathname.new(__FILE__).realpath), '../lib')
-$:.unshift lib unless $:.include?(lib)
+$LOAD_PATH.unshift lib unless $LOAD_PATH.include?(lib)
 
 require 'haproxyctl'
 include HAProxyCTL
 
-argument = ARGV[0]
+argument = ARGV.join(' ')
 
 unless has_exec?
   puts usage if argument =~ /help/ || ARGV.length < 1
 
-  raise "Cannot find haproxy executable. Please ensure it is in your $PATH, or set $HAPROXY_BIN environment variable."
+  fail 'Cannot find haproxy executable. Please ensure it is in your $PATH, or set $HAPROXY_BIN environment variable.'
 end
 
 display_usage! if argument =~ /help/ || ARGV.length < 1
 
-case argument
-when "start"
-  if pidof
-    raise("haproxy is already running on pid #{pidof}!")
-  else
-    start
-  end
-
-when "stop"
-  stop(check_running)
-
-when "restart"
-  if pidof
-    stop(pidof)
-    stillpidof = check_running()
-    while stillpidof == pidof
-      puts "still haven't killed old pid.  waiting 3s for existing connections to die... (ctrl+c to stop)"
-      sleep 3
-      stillpidof = check_running() || 0
+begin
+  case argument
+  when 'start'
+    if pidof
+      fail("haproxy is already running on pid(s) #{pidof.join(', ')}!")
+    else
+      start
     end
-    start()
-  else
-    puts "haproxy was not running.  starting..."
-    start()
-  end
-
-when "reload"
-  if ( pidof )
-    reload(pidof)
-  else
-    puts "haproxy not running.  starting..."
-    start()
-  end
-
-when "status"
-  if ( pidof )
-    puts "haproxy is running on pid #{pidof}.\nthese ports are used and guys are connected:"
-    system("lsof -ln -i |awk \'$2 ~ /#{pidof}/ {print $8\" \"$9}\'")
-  else
-    puts "haproxy is not running"
-  end
-
-when "configcheck"
-  puts `#{exec} -c -f #{config_path}`
-
-when "nagios"
-  if ( pidof )
-    puts "OK"
-    exit
-  else
-    puts "CRITICAL: HAProxy is not running!"
-    exit(2)
-  end
-when "cloudkick"
-  if ( pidof )
-    puts "status ok haproxy is running"
-    conn = `lsof -ln -i |grep -c #{pidof}`.chomp.to_i
-    # removes the listener
-    conn = conn - 1
-    puts "metric connections int #{conn}"
-    status=unixsock("show stat")
+  when 'stop'
+    stop(check_running)
+  when 'restart'
+    if pidof
+      stop(pidof)
+      stillpidof = check_running
+      while stillpidof == pidof
+        puts "still haven't killed old pid.  waiting 3s for existing connections to die... (ctrl+c to stop)"
+        sleep 3
+        stillpidof = check_running || 0
+      end
+      start
+    else
+      puts 'haproxy was not running.  starting...'
+      start
+    end
+  when 'reload'
+    if  pidof
+      reload(pidof)
+    else
+      puts 'haproxy not running.  starting...'
+      start
+    end
+  when 'status'
+    if  pidof
+      puts "haproxy is running on pid(s) #{pidof.join(', ')}.\nthese ports are used and guys are connected:"
+      pidof.each do |pid|
+        puts "Showing lsof for PID: #{pid}"
+        system("lsof -ln -i |awk \'$2 ~ /#{pid}/ {print $8\" \"$9}\'")  
+      end
+    else
+      puts 'haproxy is not running'
+    end
+  when 'configcheck'
+    puts `#{exec} -c -f #{config_path}`
+  when 'nagios'
+    if  pidof
+      puts 'OK'
+      exit
+    else
+      puts 'CRITICAL: HAProxy is not running!'
+      exit(2)
+    end
+  when 'cloudkick'
+    puts 'Not supported, need to refactor after pidof changes.'
+    # if  pidof
+    #   puts 'status ok haproxy is running'
+    #   conn = `lsof -ln -i |grep -c #{pidof}`.chomp.to_i
+    #   # removes the listener
+    #   conn = conn - 1
+    #   puts "metric connections int #{conn}"
+    #   status = unixsock('show stat')
+    #   status.each do |line|
+    #     line = line.split(',')
+    #     if line[0] !~ /^#/
+    #       host = "#{line[0]}_#{line[1]}"
+    #       puts "metric #{host}_request_rate int #{line[47]}" if line[47].to_i > 0
+    #       puts "metric #{host}_total_requests gauge #{line[49]}" if line[49].to_i > 0
+    #       puts "metric #{host}_health_check_duration int #{line[35]}" if line[35].to_i > 0
+    #       puts "metric ${host}_current_queue int #{line[3]}" if line[3].to_i > 0
+    #     end
+    #   end
+    # else
+    #   puts 'status err haproxy is not running!'
+    # end
+  when 'show health'
+    status = unixsock('show stat')
     status.each do |line|
-      line = line.split(',')
-      if (line[0] !~ /^#/)
-        host = "#{line[0]}_#{line[1]}"
-        puts "metric #{host}_request_rate int #{line[47]}" if line[47].to_i > 0
-        puts "metric #{host}_total_requests gauge #{line[49]}" if line[49].to_i > 0
-        puts "metric #{host}_health_check_duration int #{line[35]}" if line[35].to_i > 0
-        puts "metric ${host}_current_queue int #{line[3]}" if line[3].to_i > 0
+      data = line.split(',')
+      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
+    end
+  when /show backend(s?)/
+    status = unixsock('show stat').grep(/BACKEND/)
+    status.each do |line|
+      data = line.split(',')
+      printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
+    end
+  when /disable all EXCEPT (.+)/
+    servername = Regexp.last_match[ 1]
+    status = unixsock('show stat')
+    backend = status.grep(/#{servername}/)
+    backend.each do |line|
+      backend_group = line.split(',')
+      status.each do |pool|
+        data = pool.split(',')
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
+          unixsock("disable server #{data[0]}/#{data[1]}")
+        end
       end
     end
+  when /disable all (.+)/
+    servername = Regexp.last_match[ 1]
+    status = unixsock('show stat')
+    status.each do |line|
+      data = line.split(',')
+      if  ( data[1] == servername) && ( data[17] == 'UP')
+        unixsock("disable server #{data[0]}/#{servername}")
+      end
+    end
+  when /enable all EXCEPT (.+)/
+    servername = Regexp.last_match[ 1]
+    status = unixsock('show stat')
+    backend = status.grep(/#{servername}/)
+    backend.each do |line|
+      backend_group = line.split(',')
+      status.each do |pool|
+        data = pool.split(',')
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
+          unixsock("enable server #{data[0]}/#{data[1]}")
+        end
+      end
+    end
+  when /show stat (.+)/
+    fieldnames = Regexp.last_match[ 1]
+    status = unixsock('show stat')
+    indices = fieldnames.split(' ').map do |name|
+      status.first.split(',').index(name) || begin
+        $stderr.puts("no such field: #{name}")
+        $stderr.puts("  #{status.first}")
+        exit 1
+      end
+    end
+    status[1..-1].each do |line|
+      row = line.split(',')
+      filtered = indices.map { |index| row[index] }
+      puts (row[0...2] + filtered).compact.join(',')
+    end
+  when /enable all (.+)/
+    servername = Regexp.last_match[ 1]
+    status = unixsock('show stat')
+    status.each do |line|
+      data = line.split(',')
+      if  ( data[1] == servername) && ( data[17] =~ /Down|MAINT/i)
+        unixsock("enable server #{data[0]}/#{servername}")
+      end
+    end
+  when 'version'
+    version
   else
-    puts "status err haproxy is not running!"
+    puts unixsock(argument)
   end
-when "show health"
-  status=unixsock("show stat")
-  status.each do |line|
-    data = line.split(',')
-    printf "%-25s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
-  end
-when /show backend(s?)/
-  status=unixsock("show stat").grep(/BACKEND/)
-  status.each do |line|
-    data = line.split(',')
-    printf "%-25s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
-  end
-when /disable all EXCEPT (.+)/
-  servername=$1
-  status=unixsock("show stat")
-  backend = status.grep(/#{servername}/)
-  backend.each do |line|
-    backend_group = line.split(',')
-    status.each do |pool|
-      data = pool.split(',')
-      if ( (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/ ) && ( data[17] = 'UP' ) )
-        unixsock("disable server #{data[0]}/#{data[1]}")
-      end
-    end
-  end
-when /disable all (.+)/
-  servername=$1
-  status=unixsock("show stat")
-  status.each do |line|
-    data = line.split(',')
-    if ( ( data[1] = servername ) && ( data[17] = 'UP' ) )
-      unixsock("disable server #{data[0]}/#{servername}")
-    end
-  end
-when /enable all EXCEPT (.+)/
-  servername=$1
-  status=unixsock("show stat")
-  backend = status.grep(/#{servername}/)
-  backend.each do |line|
-    backend_group = line.split(',')
-    status.each do |pool|
-      data = pool.split(',')
-      if ( (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/ ) && ( data[17] =~ /Down|MAINT/i ) )
-        unixsock("enable server #{data[0]}/#{data[1]}")
-      end
-    end
-  end
-when /enable all (.+)/
-  servername=$1
-  status=unixsock("show stat")
-  status.each do |line|
-    data = line.split(',')
-    if ( ( data[1] = servername ) && ( data[17] =~ /Down|MAINT/i ) )
-      unixsock("enable server #{data[0]}/#{servername}")
-    end
-  end
-else
-  puts unixsock( "#{ARGV}" )
+rescue Errno::ENOENT => e
+  STDERR.puts e
+  exit 1
 end

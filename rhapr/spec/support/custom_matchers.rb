@@ -1,13 +1,13 @@
 module CustomMatchers
   class BeWellFormed
     def matches?(files)
-      @errors = files.map {|filename|
+      @errors = files.map do|filename|
                   [
                     check_for_tabs(filename),
                     excessive_spacing(filename),
                     newline_precedes_eof(filename)
                   ]
-                }.flatten.compact
+                end.flatten.compact
 
       @errors.empty?
     end
@@ -16,7 +16,7 @@ module CustomMatchers
       @errors.join("\n")
     end
 
-  private
+    private
     def check_for_tabs(filename)
       bad_lines = File.readlines(filename).each_with_index.map do |line, line_no|
                     line_no + 1 if line["\t"] and line !~ /^\s+#.*\s+\n$/

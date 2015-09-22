@@ -21,7 +21,7 @@ module Rhapr
       resp = send 'clear counters'
       resp == EMPTY
     end
-    alias :clear :clear_counters
+    alias_method :clear, :clear_counters
 
     # @return [Hash{String => String}] The 'show info' attributes, from HAProxy, parsed into a Hash.
     def show_info
@@ -29,38 +29,38 @@ module Rhapr
 
       attrs = resp.split("\n")
 
-      attrs.map! {|line|
+      attrs.map! do|line|
         _attr, *_val = line.split(/: /)
-        [ _attr, _val.join ]
-      }
+        [_attr, _val.join]
+      end
 
-      Hash[ attrs ]
+      Hash[ attrs]
     end
-    alias :info :show_info
+    alias_method :info, :show_info
 
     # @return [Array<Hash{String => String}>] The 'show stat' response, from HAProxy, parsed into an Array of Hashes.
     def show_stat
       resp = send 'show stat'
       resp.gsub!(/^# /, '')
 
-      csv = CSV.parse(resp, :headers => true)
+      csv = CSV.parse(resp, headers: true)
       out = csv.map(&:to_a)
 
-      out.map!{|row| Hash[ row ]}
+      out.map! { |row| Hash[ row] }
 
-      return(out)
+      (out)
     end
-    alias :stat :show_stat
+    alias_method :stat, :show_stat
 
     # @todo: Implement. I do not know the possible errors that may be present, nor how HAProxy will render them.
     def show_errors
     end
-    alias :errors :show_errors
+    alias_method :errors, :show_errors
 
     # @todo: Implement. Not sure how this should look. It's likely that I will want to 'interpret' the data that is spit out.
     def show_sess(id)
     end
-    alias :session :show_sess
+    alias_method :session, :show_sess
 
     # @return [Array<Fixnum, Fixnum>] An Array with Two Elements: the Current Weight and the Initial Weight.
     # @todo: Allow the numeric id to be used as a parameter?
@@ -68,11 +68,11 @@ module Rhapr
       resp = send "get weight #{backend}/#{server}"
 
       resp.match /([[:digit:]]+) \(initial ([[:digit:]]+)\)/
-      weight, initial = $1, $2
+      weight, initial = Regexp.last_match[1], Regexp.last_match[2]
 
       return [weight.to_i, initial.to_i] if weight and initial
 
-      raise ArgumentError.new("HAProxy did not recognize the specified Backend/Server. Response from HAProxy: #{resp}")
+      fail ArgumentError.new("HAProxy did not recognize the specified Backend/Server. Response from HAProxy: #{resp}")
     end
 
     # @todo: Implement.
@@ -88,7 +88,7 @@ module Rhapr
     def enable(backend, server)
     end
 
-   protected
+    protected
     # @param [UNIXSocket]
     # @param [String]
     # @return [nil]
@@ -105,7 +105,7 @@ module Rhapr
     # @see Rhapr::Interface#read
     def read_full(socket)
       output = []
-      output << read(socket) until(sock.eof?)
+      output << read(socket) until sock.eof?
     end
   end
 end
