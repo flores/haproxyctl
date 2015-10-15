@@ -52,6 +52,7 @@ usage: ./haproxyctl <argument>
     configcheck: check /etc/haproxy/haproxy.cfg
     nagios: nagios-friendly status for running process and listener
     cloudkick: cloudkick.com-friendly status and metric for connected users
+    statsd: statsd friendly metrics output
     show health: show status of all frontends and backend servers
     show backends: show status of backend pools of servers
     enable all <server>: re-enable a server previously in maint mode on multiple backends
@@ -344,6 +345,13 @@ Examples
   ssh             BACKEND              UP      1 
 </pre>
 
+## Publish metrics to statsd
+```
+# /dev/udp 'hack' requires bash
+./haproxyctl statsd > /dev/udp/#{statsd_host}/#{statsd_port}
+```
+
+
 Contributors
 ------------
 
@@ -360,6 +368,7 @@ Contributors
 - [Florian Holzhauer aka `fh`](https://github.com/fh)
 - [Jonas Genannt aka `hggh`](https://github.com/hggh)
 - [Grant Shively aka `gshively11`](https://github.com/gshively11)
+- [Brian Wiborg aka `baccenfutter`](https://github.com/baccenfutter)
 
 Non-current HAProxy versions 
 ------------

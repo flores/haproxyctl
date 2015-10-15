@@ -96,6 +96,7 @@ usage: #{$PROGRAM_NAME} <argument>
     configcheck                 : check #{config_path}
     nagios                      : nagios-friendly status for running process and listener
     cloudkick                   : cloudkick.com-friendly status and metric for connected users
+    statsd                      : statsd friendly metrics output
     show health                 : show status of all frontends and backend servers
     show backends               : show status of backend pools of servers
     enable all <server>         : re-enable a server previously in maint mode on multiple backends
