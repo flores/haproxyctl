@@ -79,7 +79,7 @@ module HAProxyCTL
       end
 
       # verify these pid(s) exists and are haproxy
-      if pids and pids.all? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/ }
+      if pids and pids.all? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o command=` =~ /#{exec}/ }
         return pids
       end
     end
