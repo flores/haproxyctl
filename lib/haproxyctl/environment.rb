@@ -41,7 +41,7 @@ module HAProxyCTL
         config.match /nbproc \s*(\d*)\s*/
 	@x = 1
 	if (Regexp.last_match)
-          Regexp.last_match[1].to_i
+          @x = Regexp.last_match[1].to_i
 	end
 	(@x)
       end
