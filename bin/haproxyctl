@@ -124,7 +124,7 @@ begin
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
           unixsock("disable server #{data[0]}/#{data[1]}", process)
         end
       end
@@ -135,7 +135,7 @@ begin
     status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
-      if  ( data[1] == servername) && ( data[17] == 'UP')
+      if  ( data[1] == servername)
         unixsock("disable server #{data[0]}/#{servername}", process)
       end
     end
@@ -148,7 +148,7 @@ begin
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
           unixsock("enable server #{data[0]}/#{data[1]}", process)
         end
       end
@@ -175,7 +175,7 @@ begin
     status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
-      if  ( data[1] == servername) && ( data[17] =~ /DOWN|MAINT|DRAIN/i)
+      if  ( data[1] == servername)
         unixsock("enable server #{data[0]}/#{servername}", process)
       end
     end
@@ -185,7 +185,7 @@ begin
     status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
-      if  ( data[1] == servername) && ( data[17] == 'UP')
+      if  ( data[1] == servername)
         unixsock("set server #{data[0]}/#{servername} state drain", process)
       end
     end
@@ -198,7 +198,7 @@ begin
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
           unixsock("set server #{data[0]}/#{data[1]} state drain", process)
         end
       end
