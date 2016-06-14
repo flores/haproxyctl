@@ -43,14 +43,15 @@ module HAProxyCTL
       end
     end
 
-    def socket
-      @socket ||= begin
-        # If the haproxy config is using nbproc > 1, we assume that all cores
-        # except for 1 do not need commands sent to their sockets (if they exist).
-        # This is a poor assumption, so TODO: improve CLI to accept argument for
-        # processes to target.
+    def socket(process = 1)
+      process = 1 if process == 0
+      @sockets ||= []
+      @sockets[process] ||= begin
+        # If the haproxy config is using nbproc > 1, we pick which socket to use based
+        # on the stats socket process assignment. We expect each stats socket to be
+        # assigned to a single process (we don't support ranges even though haproxy does).
         if nbproc > 1
-          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
+          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*#{process}[\d^]?/
         else
           config.match /stats\s+socket \s*([^\s]*)/
         end
