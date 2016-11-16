@@ -114,7 +114,7 @@ begin
       status.each do |line|
         if not line.chomp == ""
           stats=Hash[HEADERS.zip(line.split(','))]
-          %w(scur smax ereq econ rate act chkfail chkdown).each do |statname|
+          %w(scur smax ereq econ rate act chkfail chkdown ctime rtime ttime).each do |statname|
             next unless stats['svname'] == 'BACKEND'
             puts "HAProxy.#{INSTANCE}.#{stats['pxname']}.#{stats['svname']}.#{statname}:#{stats[statname]}|g"
           end
