@@ -101,6 +101,26 @@ begin
     # else
     #   puts 'status err haproxy is not running!'
     # end
+  when "statsd"
+    if pidof
+      status=unixsock("show stat")
+      line=status[0].gsub!(/# /,'')
+      HEADERS=line.split(',')[0..-2]
+      CONFIG_INSTANCE_FILE = '/etc/haproxy/haproxyctl/instance-name'
+      CONFIG_INSTANCE_DEFAULT_NAME = 'testing.localhost'
+      INSTANCE = File.read(CONFIG_INSTANCE_FILE).chomp if File.exists?(CONFIG_INSTANCE_FILE)
+      INSTANCE ||= CONFIG_INSTANCE_DEFAULT_NAME
+      status.shift
+      status.each do |line|
+        if not line.chomp == ""
+          stats=Hash[HEADERS.zip(line.split(','))]
+          %w(scur smax ereq econ rate act chkfail chkdown ctime rtime ttime).each do |statname|
+            next unless stats['svname'] == 'BACKEND'
+            puts "HAProxy.#{INSTANCE}.#{stats['pxname']}.#{stats['svname']}.#{statname}:#{stats[statname]}|g"
+          end
+        end
+      end
+    end
   when 'show health'
     status = unixsock('show stat')
     status.each do |line|
