@@ -53,8 +53,16 @@ begin
       start
     end
   when 'reload'
-    if  pidof
+    if pidof
       reload(pidof)
+    else
+      puts 'haproxy not running.  starting...'
+      start
+    end
+  when /reload_kill_zombies\s(\d+)/
+    if pidof
+      seconds_to_wait = Regexp.last_match[1].to_i
+      reload_kill_zombies(pidof, seconds_to_wait)
     else
       puts 'haproxy not running.  starting...'
       start

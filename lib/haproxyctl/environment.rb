@@ -85,5 +85,10 @@ module HAProxyCTL
       end
     end
     alias_method :pidof, :check_running
+
+    def any_running(pids)
+      return false if !pids || pids.empty?
+      pids.any? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/ }
+    end
   end
 end
