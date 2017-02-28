@@ -81,6 +81,7 @@ module HAProxyCTL
           puts "old pids still alive.
                             waiting 2s and checking again"
           sleep 2
+          seconds_waited = seconds_waited + 2
         end
       end
     else
