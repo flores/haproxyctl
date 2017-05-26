@@ -1,6 +1,6 @@
 module HAProxyCTL
   module Environment
-    attr_accessor :pidof, :config_path, :config, :exec
+    attr_accessor :pidof, :config_path, :config, :exec, :conf_fol
 
     def version
       puts "HAProxyCTL #{HAProxyCTL::VERSION}"
@@ -16,6 +16,17 @@ module HAProxyCTL
 
     def has_exec?
       !exec.nil?
+    end
+
+    def conf_fol
+      @conf_fol ||= begin
+      @x = ""
+      Dir.foreach('/etc/haproxy/conf.d') do |i|
+      next if i == '.' or i == '..'
+      @x = "#{@x} -f /etc/haproxy/conf.d/#{i}"
+      end
+      (@x)
+      end
     end
 
     def exec
