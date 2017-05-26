@@ -7,7 +7,7 @@ module HAProxyCTL
 
   def start
     puts 'starting haproxy...'
-    system("#{exec} -f #{config_path} -D -p #{pidfile}")
+    system("#{exec} -f #{config_path} #{conf_fol} -D -p #{pidfile}")
     newpids = check_running
     if newpids.all? {|newpid| newpid =~ /^\d+$/} 
       puts "haproxy is running on pid #{newpids.join(', ')}"
