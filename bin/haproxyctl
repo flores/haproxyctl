@@ -53,8 +53,16 @@ begin
       start
     end
   when 'reload'
-    if  pidof
+    if pidof
       reload(pidof)
+    else
+      puts 'haproxy not running.  starting...'
+      start
+    end
+  when /reload_kill_zombies\s(\d+)/
+    if pidof
+      seconds_to_wait = Regexp.last_match[1].to_i
+      reload_kill_zombies(pidof, seconds_to_wait)
     else
       puts 'haproxy not running.  starting...'
       start
@@ -101,56 +109,62 @@ begin
     # else
     #   puts 'status err haproxy is not running!'
     # end
-  when 'show health'
-    status = unixsock('show stat')
+  when /(\d\s)?show health/
+    process = Regexp.last_match[1].to_i
+    status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
       printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
-  when /show backend(s?)/
-    status = unixsock('show stat').grep(/BACKEND/)
+  when /(\d\s)?show backends?/
+    process = Regexp.last_match[1].to_i
+    status = unixsock('show stat', process).grep(/BACKEND/)
     status.each do |line|
       data = line.split(',')
       printf "%-30s %-30s %-7s %3s\n", data[0], data[1], data[17], data[18]
     end
-  when /disable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+  when /(\d\s)?disable all EXCEPT (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
     backend = status.grep(/#{servername}/)
     backend.each do |line|
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] == 'UP')
-          unixsock("disable server #{data[0]}/#{data[1]}")
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
+          unixsock("disable server #{data[0]}/#{data[1]}", process)
         end
       end
     end
-  when /disable all (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+  when /(\d\s)?disable all (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
-      if  ( data[1] == servername) && ( data[17] == 'UP')
-        unixsock("disable server #{data[0]}/#{servername}")
+      if  ( data[1] == servername)
+        unixsock("disable server #{data[0]}/#{servername}", process)
       end
     end
-  when /enable all EXCEPT (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+  when /(\d\s)?enable all EXCEPT (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
     backend = status.grep(/#{servername}/)
     backend.each do |line|
       backend_group = line.split(',')
       status.each do |pool|
         data = pool.split(',')
-        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/) && ( data[17] =~ /Down|MAINT/i)
-          unixsock("enable server #{data[0]}/#{data[1]}")
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
+          unixsock("enable server #{data[0]}/#{data[1]}", process)
         end
       end
     end
-  when /show stat (.+)/
-    fieldnames = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+  when /(\d\s)?show stat (.+)/
+    process = Regexp.last_match[1].to_i
+    fieldnames = Regexp.last_match[2]
+    status = unixsock('show stat', process)
     indices = fieldnames.split(' ').map do |name|
       status.first.split(',').index(name) || begin
         $stderr.puts("no such field: #{name}")
@@ -163,19 +177,50 @@ begin
       filtered = indices.map { |index| row[index] }
       puts (row[0...2] + filtered).compact.join(',')
     end
-  when /enable all (.+)/
-    servername = Regexp.last_match[ 1]
-    status = unixsock('show stat')
+  when /(\d\s)?enable all (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
     status.each do |line|
       data = line.split(',')
-      if  ( data[1] == servername) && ( data[17] =~ /Down|MAINT/i)
-        unixsock("enable server #{data[0]}/#{servername}")
+      if  ( data[1] == servername)
+        unixsock("enable server #{data[0]}/#{servername}", process)
+      end
+    end
+  when /(\d\s)?drain all (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
+    status.each do |line|
+      data = line.split(',')
+      if  ( data[1] == servername)
+        unixsock("set server #{data[0]}/#{servername} state drain", process)
+      end
+    end
+  when /(\d\s)?drain all EXCEPT (.+)/
+    process = Regexp.last_match[1].to_i
+    servername = Regexp.last_match[2]
+    status = unixsock('show stat', process)
+    backend = status.grep(/#{servername}/)
+    backend.each do |line|
+      backend_group = line.split(',')
+      status.each do |pool|
+        data = pool.split(',')
+        if  (data[0] == backend_group[0]) && ( data[1] !~ /#{servername}|BACKEND|FRONTEND/)
+          unixsock("set server #{data[0]}/#{data[1]} state drain", process)
+        end
       end
     end
   when 'version'
     version
+  when /(\d\s)?(.*)/
+    process = Regexp.last_match[1].to_i
+    command = Regexp.last_match[2]
+    puts unixsock(command, process)
   else
-    puts unixsock(argument)
+    # this case shouldn't be reached due to the
+    # above regex, but leaving it here just in case
+    puts unixsock(argument, nil)
   end
 rescue Errno::ENOENT => e
   STDERR.puts e

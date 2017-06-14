@@ -38,19 +38,47 @@ module HAProxyCTL
 
     def nbproc 
       @nbproc ||= begin
-        config.match /nbproc \s*(\d*)\s*/
-        Regexp.last_match[1].to_i || 1
+        config.match /^\s*nbproc \s*(\d*)\s*/
+        (Regexp.last_match && Regexp.last_match[1].to_i) || 1
+      rescue
+        1
       end
     end
 
-    def socket
-      @socket ||= begin
-        # If the haproxy config is using nbproc > 1, we assume that all cores
-        # except for 1 do not need commands sent to their sockets (if they exist).
-        # This is a poor assumption, so TODO: improve CLI to accept argument for
-        # processes to target.
+    def load_server_state_from_file
+      @load_server_state_from_file ||= begin
+        config.match /^\s*load-server-state-from-file \s*(.*)/
+        Regexp.last_match && Regexp.last_match[1] && Regexp.last_match[1].strip
+      rescue
+        nil
+      end
+    end
+
+    def server_state_file
+      @server_state_file ||= begin
+        # we don't support writing local state files yet, only global
+        return nil unless load_server_state_from_file == 'global'
+        config.match /^\s*server-state-file \s*(.*)/
+        state_file = Regexp.last_match && Regexp.last_match[1].strip
+        return nil if !state_file
+        return state_file if state_file.start_with?('/')
+        config.match /^\s*server-state-base \s*(.*)/
+        state_base = (Regexp.last_match && Regexp.last_match[1].strip) || Dir.pwd
+        return File.join(state_base, state_file)
+      rescue
+        nil
+      end
+    end
+
+    def socket(process = 1)
+      process = 1 if process == 0
+      @sockets ||= []
+      @sockets[process] ||= begin
+        # If the haproxy config is using nbproc > 1, we pick which socket to use based
+        # on the stats socket process assignment. We expect each stats socket to be
+        # assigned to a single process (we don't support ranges even though haproxy does).
         if nbproc > 1
-          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*1[\d^]?/
+          config.match /stats\s+socket \s*([^\s]*) \s*.*process \s*#{process}[\d^]?/
         else
           config.match /stats\s+socket \s*([^\s]*)/
         end
@@ -84,5 +112,10 @@ module HAProxyCTL
       end
     end
     alias_method :pidof, :check_running
+
+    def any_running(pids)
+      return false if !pids || pids.empty?
+      pids.any? { |pid| pid =~ /^\d+$/ and `ps -p #{pid} -o cmd=` =~ /#{exec}/ }
+    end
   end
 end
