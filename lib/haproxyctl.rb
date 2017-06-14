@@ -29,63 +29,74 @@ module HAProxyCTL
   end
 
   def reload(pids)
-    if pids
-      puts "gracefully stopping connections on pids #{pids.join(', ')}..."
-      system("#{exec} -D -f #{config_path} -p #{pidfile} -sf $(cat #{pidfile})")
-      puts "checking if connections still alive on #{pids.join(', ')}..."
-      nowpids = check_running
-      while pids == nowpids
-        puts "still haven't killed old pids.
-                            waiting 2s for existing connections to die...
-                            (ctrl+c to stop this check)"
-        sleep 2
-        nowpids = check_running || 0
-      end
-      puts "reloaded haproxy on pids #{nowpids.join(', ')}"
-    else
+    unless pids
       puts 'haproxy is not running!'
+      return
     end
+    pids_string = pids.join(' ')
+    puts "gracefully stopping connections on pids #{pids_string}..."
+    reload_succeeded = system("#{exec} -D -f #{config_path} -p #{pidfile} -sf $(cat #{pidfile})")
+    puts "checking if connections still alive on #{pids_string}..."
+    nowpids = check_running
+    if !reload_succeeded
+      puts "pids no longer exist, haproxy may no longer be running" unless pids == nowpids
+      puts "failed to reload haproxy, check errors above"
+      return
+    end
+    while pids == nowpids
+      puts "still haven't killed old pids.
+                          waiting 2s for existing connections to die...
+                          (ctrl+c to stop this check)"
+      sleep 2
+      nowpids = check_running || 0
+    end
+    puts "reloaded haproxy on pids #{nowpids.join(', ')}"
   end
 
   def reload_kill_zombies(pids, seconds_to_wait)
-    if pids
-      pids_string = pids.join(' ')
-      puts "gracefully stopping connections on pids #{pids_string}..."
-      system("#{exec} -D -f #{config_path} -p #{pidfile} -sf #{pids_string}")
-      puts "checking if connections still alive on #{pids_string}..."
-      nowpids = check_running
-      while pids == nowpids
-        puts "still haven't killed old pids.
-                            waiting 2s for existing connections to die...
-                            (ctrl+c to stop this check)"
-        sleep 2
-        nowpids = check_running || 0
-      end
-      puts "reloaded haproxy on pids #{nowpids.join(', ')}"
-      puts "ensuring that old pids aren't zombies"
-      seconds_waited = 0
-      termed = false
-      while any_running pids
-        if seconds_waited > seconds_to_wait
-          puts "waited #{seconds_waited} for old pids to exit.
-                            they did not die gracefully.
-                            terminating #{pids_string}"
-          if termed
-            puts "SIGTERM didn't work, killing #{pids_string}"
-            system("kill -9 #{pids_string} 2> /dev/null")
-          else
-            system("kill #{pids_string} 2> /dev/null")
-            termed = true
-          end
-        else
-          puts "old pids still alive.
-                            waiting 2s and checking again"
-          sleep 2
-          seconds_waited = seconds_waited + 2
-        end
-      end
-    else
+    unless pids
       puts 'haproxy is not running!'
+      return
+    end
+    pids_string = pids.join(' ')
+    puts "gracefully stopping connections on pids #{pids_string}..."
+    reload_succeeded = system("#{exec} -D -f #{config_path} -p #{pidfile} -sf #{pids_string}")
+    puts "checking if connections still alive on #{pids_string}..."
+    nowpids = check_running
+    if !reload_succeeded
+      puts "pids no longer exist, haproxy may no longer be running" unless pids == nowpids
+      puts "failed to reload haproxy, check errors above"
+      return
+    end
+    while pids == nowpids
+      puts "still haven't killed old pids.
+                          waiting 2s for existing connections to die...
+                          (ctrl+c to stop this check)"
+      sleep 2
+      nowpids = check_running || 0
+    end
+    puts "reloaded haproxy on pids #{nowpids.join(', ')}"
+    puts "ensuring that old pids aren't zombies"
+    seconds_waited = 0
+    termed = false
+    while any_running pids
+      if seconds_waited >= seconds_to_wait
+        puts "waited #{seconds_waited} for old pids to exit.
+                          they did not die gracefully.
+                          terminating #{pids_string}"
+        if termed
+          puts "SIGTERM didn't work, killing #{pids_string}"
+          system("kill -9 #{pids_string} 2> /dev/null")
+        else
+          system("kill #{pids_string} 2> /dev/null")
+          termed = true
+        end
+      else
+        puts "old pids still alive.
+                          waiting 2s and checking again"
+        sleep 2
+        seconds_waited = seconds_waited + 2
+      end
     end
   end
 
