@@ -38,8 +38,35 @@ module HAProxyCTL
 
     def nbproc 
       @nbproc ||= begin
-        config.match /nbproc \s*(\d*)\s*/
-        Regexp.last_match[1].to_i || 1
+        config.match /^\s*nbproc \s*(\d*)\s*/
+        (Regexp.last_match && Regexp.last_match[1].to_i) || 1
+      rescue
+        1
+      end
+    end
+
+    def load_server_state_from_file
+      @load_server_state_from_file ||= begin
+        config.match /^\s*load-server-state-from-file \s*(.*)/
+        Regexp.last_match && Regexp.last_match[1] && Regexp.last_match[1].strip
+      rescue
+        nil
+      end
+    end
+
+    def server_state_file
+      @server_state_file ||= begin
+        # we don't support writing local state files yet, only global
+        return nil unless load_server_state_from_file == 'global'
+        config.match /^\s*server-state-file \s*(.*)/
+        state_file = Regexp.last_match && Regexp.last_match[1].strip
+        return nil if !state_file
+        return state_file if state_file.start_with?('/')
+        config.match /^\s*server-state-base \s*(.*)/
+        state_base = (Regexp.last_match && Regexp.last_match[1].strip) || Dir.pwd
+        return File.join(state_base, state_file)
+      rescue
+        nil
       end
     end
 

@@ -20,6 +20,7 @@ module HAProxyCTL
 
   def stop(pids)
     if pids
+      write_server_state_file
       puts "stopping haproxy on pids #{pids.join(', ')}..."
       pids.each { |pid| system("kill #{pid}") || system("kill -9 #{pid}") }
       puts '... stopped'
@@ -33,6 +34,7 @@ module HAProxyCTL
       puts 'haproxy is not running!'
       return
     end
+    write_server_state_file
     pids_string = pids.join(' ')
     puts "gracefully stopping connections on pids #{pids_string}..."
     reload_succeeded = system("#{exec} -D -f #{config_path} -p #{pidfile} -sf $(cat #{pidfile})")
@@ -58,6 +60,7 @@ module HAProxyCTL
       puts 'haproxy is not running!'
       return
     end
+    write_server_state_file
     pids_string = pids.join(' ')
     puts "gracefully stopping connections on pids #{pids_string}..."
     reload_succeeded = system("#{exec} -D -f #{config_path} -p #{pidfile} -sf #{pids_string}")
@@ -96,6 +99,17 @@ module HAProxyCTL
                           waiting 2s and checking again"
         sleep 2
         seconds_waited = seconds_waited + 2
+      end
+    end
+  end
+
+  def write_server_state_file
+    return unless server_state_file
+    begin
+      File.open(server_state_file, 'w') do |f|
+        (1..nbproc).each do |i|
+          f.puts(unixsock('show servers state', i))
+        end
       end
     end
   end
